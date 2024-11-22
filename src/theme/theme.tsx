@@ -1,10 +1,18 @@
 import { createTheme } from "@mui/material/styles";
+import { PaletteOptions } from "@mui/material/styles/createPalette";
+
+declare module "@mui/material/styles" {
+  interface Palette {
+    white: string;
+  }
+  interface PaletteOptions {
+    white: string;
+  }
+}
 
 const theme = createTheme({
   palette: {
-    white: {
-      main: "#ffffff", // Color blanco
-    },
+    white: "#ffffff",
     primary: {
       main: "#6e8a91", // Verde grisáceo suave
       light: "#A0B9B1", // Verde más claro
