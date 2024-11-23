@@ -5,7 +5,7 @@ import { Authenticator } from "@aws-amplify/ui-react";
 import React from "react";
 import outputs from "../../../amplify_outputs.json";
 import { Amplify } from "aws-amplify";
-import { Box, Card, CardContent, Typography } from "@mui/material"; // Material UI components
+import { Box } from "@mui/material"; // Material UI components
 
 Amplify.configure(outputs);
 

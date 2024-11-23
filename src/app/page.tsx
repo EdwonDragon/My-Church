@@ -4,7 +4,7 @@ import { useAuthenticator } from "@aws-amplify/ui-react";
 import { useEffect } from "react";
 import { setLoading, setUser } from "@/store/slices/authSlice";
 import { useAppDispatch } from "@/store/hooks";
-import Home from "./home/page";
+import Home from "./Home/page";
 
 export default function HomePage() {
   const { user } = useAuthenticator();

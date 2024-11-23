@@ -10,7 +10,9 @@ const Menu = () => {
   const [open, setOpen] = React.useState(false);
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
-  const menuItems = [{ text: "Home", icon: <InboxIcon />, route: "/home" }];
+  const menuItems = [
+    { text: "Conferences", icon: <InboxIcon />, route: "/Conferences" },
+  ];
   return (
     <Box sx={{ display: "flex" }}>
       <AppBarComponent open={open} handleDrawerOpen={handleDrawerOpen} />
