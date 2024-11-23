@@ -39,7 +39,7 @@ const schema = a.schema({
     positionId: a.id().required(),
     position: a.belongsTo('PositionConferences', 'positionId'),  // Relación a PositionConferences
   }),
-}).authorization((allow) => allow.publicApiKey());
+}).authorization(allow => [allow.owner()]);
 
 export type Schema = ClientSchema<typeof schema>;
 

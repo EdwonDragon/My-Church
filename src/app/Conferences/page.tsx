@@ -30,7 +30,6 @@ const Conferences = () => {
   useEffect(() => {
     const fetchConferences = async () => {
       const { data } = await client.models.Conference.list();
-      console.log("d", data);
       setConferences(data);
     };
     fetchConferences();
@@ -46,7 +45,8 @@ const Conferences = () => {
       });
     } else {
       // Creación
-      await client.models.Conference.create(data);
+      const ddd = await client.models.Conference.create(data);
+      console.log(ddd);
     }
 
     // Actualiza la lista de conferencias

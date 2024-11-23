@@ -22,6 +22,7 @@ const BreadCrumb = ({ open }: BreadCrumProps) => {
     "/": "Inicio",
     "/home": "Inicio",
     "/home/": "Inicio",
+    "/Conferences": "Conferencias",
   };
 
   // Get the current page name from the route
