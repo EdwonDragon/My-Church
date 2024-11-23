@@ -10,7 +10,7 @@ const schema = a.schema({
     date: a.date().required(),
     description: a.string().required(),
     // Relación con los departamentos dentro de la conferencia
-    departments: a.hasMany('Department', 'conferenceId'),
+    departments: a.hasMany('DepartmentConferences', 'conferenceId'),
   }),
 
   // Modelo para Departments (departamentos dentro de la conferencia)
@@ -39,7 +39,7 @@ const schema = a.schema({
     positionId: a.id().required(),  // ID del puesto que ocupa el usuario dentro del departamento
     position: a.belongsTo('PositionConferences', 'positionId'),  // Relación con el puesto
   }),
-}).authorization((allow) => allow.publicApiKey());
+}).authorization(allow => [allow.owner()]);
 
 export type Schema = ClientSchema<typeof schema>;
 
