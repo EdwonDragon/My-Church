@@ -9,7 +9,7 @@ import { Box } from "@mui/material"; // Material UI components
 
 Amplify.configure(outputs);
 
-const Authenticators = ({ children }: { children: React.ReactNode }) => {
+const Authenticators = ({ children }) => {
   return (
     <Box
       sx={{
