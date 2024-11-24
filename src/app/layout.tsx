@@ -1,10 +1,8 @@
-import React from "react";
+import { ReactNode } from "react";
 import Providers from "@/store/providers";
 import Authenticators from "@/components/Auth/Authenticators";
 import Themes from "@/theme/themes";
-import Menu from "@/components/Menu/Menu";
-import BreadCrumb from "@/components/BreadCrumb/BreadCrumb";
-import { Container } from "@mui/material";
+import State from "../components/State/State";
 
 export const metadata = {
   title: "My Church",
@@ -14,22 +12,17 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang='en'>
+    <html lang='es'>
       {/* Aplicar el tema global a toda la app */}
       <Themes>
         <body>
           {/* Proveedores y autenticadores envuelven a la aplicación */}
           <Providers>
             <Authenticators>
-              {/* Menú de navegación personalizado */}
-              <Menu />
-
+              {/* State maneja state y menu */}
+              <State />
               {/* Contenido de la página */}
               {children}
             </Authenticators>

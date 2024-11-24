@@ -1,17 +1,21 @@
 "use client";
 import { Box } from "@mui/material";
 import React from "react";
+
 import AppBarComponent from "./AppBar";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MiniDrawer from "./CustomDrawer";
 import BreadCrumb from "../BreadCrumb/BreadCrumb";
-
+import PublicIcon from "@mui/icons-material/Public";
 const Menu = () => {
   const [open, setOpen] = React.useState(false);
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
   const menuItems = [
-    { text: "Conferences", icon: <InboxIcon />, route: "/Conferences" },
+    {
+      text: "Conferences",
+      icon: <PublicIcon htmlColor='white' />,
+      route: "/Conferences",
+    },
   ];
   return (
     <Box sx={{ display: "flex" }}>

@@ -1,8 +1,12 @@
 import { defineBackend } from '@aws-amplify/backend';
-import { auth } from './auth/resource.js';
-import { data } from './data/resource.js';
+import { auth } from './auth/resource';
+import { data } from './data/resource';
 
-defineBackend({
+const backend = defineBackend({
   auth,
   data,
 });
+
+const { groups } = backend.auth.resources
+
+groups["SUPERADMIND"].role

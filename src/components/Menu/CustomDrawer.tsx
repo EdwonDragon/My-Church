@@ -103,7 +103,7 @@ const MiniDrawer = ({
       <Drawer variant='permanent' open={open}>
         <DrawerHeader>
           <IconButton onClick={handleDrawerClose} aria-label='close drawer'>
-            {theme.direction !== "rtl" && <ChevronLeftIcon />}
+            {theme.direction !== "rtl" && <ChevronLeftIcon htmlColor='white' />}
           </IconButton>
         </DrawerHeader>
         <Divider />

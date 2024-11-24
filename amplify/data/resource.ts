@@ -10,7 +10,9 @@ const schema = a.schema({
     date: a.date().required(),
     description: a.string().required(),
     departments: a.hasMany('DepartmentConferences', 'conferenceId'),
-  }).authorization(allow => [allow.owner()]),
+  }).authorization(allow => [
+    allow.groups(["SUPERADMIND"]).to(["read", "update", "create", "update"])
+  ]),
 
   // Modelo para Departments (departamentos dentro de la conferencia)
   DepartmentConferences: a.model({
@@ -19,7 +21,9 @@ const schema = a.schema({
     conferenceId: a.id().required(),
     positions: a.hasMany('PositionConferences', 'departmentId'),
     conference: a.belongsTo('Conference', 'conferenceId'),
-  }).authorization(allow => [allow.owner()]),
+  }).authorization(allow => [
+    allow.groups(["SUPERADMIND"]).to(["read", "update", "create", "update"])
+  ]),
 
   // Modelo para Position (Puestos dentro de un departamento)
   PositionConferences: a.model({
@@ -29,7 +33,9 @@ const schema = a.schema({
     departmentId: a.id().required(),
     department: a.belongsTo('DepartmentConferences', 'departmentId'),
     users: a.hasMany('UsersConferences', 'positionId'),  // Relación inversa con UsersConferences
-  }).authorization(allow => [allow.owner()]),
+  }).authorization(allow => [
+    allow.groups(["SUPERADMIND"]).to(["read", "update", "create", "update"])
+  ]),
 
   // Modelo para UsersConferences (Usuarios en la conferencia, asignados a un puesto)
   UsersConferences: a.model({
@@ -38,7 +44,9 @@ const schema = a.schema({
     role: a.string().required(),
     positionId: a.id().required(),
     position: a.belongsTo('PositionConferences', 'positionId'),  // Relación a PositionConferences
-  }).authorization(allow => [allow.owner()]),
+  }).authorization(allow => [
+    allow.groups(["SUPERADMIND"]).to(["read", "update", "create", "update"])
+  ]),
 });
 
 export type Schema = ClientSchema<typeof schema>;
