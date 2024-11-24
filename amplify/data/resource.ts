@@ -45,7 +45,7 @@ const schema = a.schema({
     positionId: a.id().required(),
     position: a.belongsTo('PositionConferences', 'positionId'),  // Relación a PositionConferences
   }).authorization(allow => [
-    allow.groups(["SUPERADMIND"]).to(["read", "update", "create", "update"])
+    allow.groups(["SUPERADMIND"]).to(["read"])
   ]),
 });
 
