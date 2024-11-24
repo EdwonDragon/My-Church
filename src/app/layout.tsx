@@ -20,12 +20,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <body>
           {/* Proveedores y autenticadores envuelven a la aplicación */}
           <Providers>
-            <Authenticators>
-              {/* State maneja state y menu */}
-              <State />
-              {/* Contenido de la página */}
-              {children}
-            </Authenticators>
+            {/* <Authenticators> */}
+            {/* State maneja state y menu */}
+            <State />
+            {/* Contenido de la página */}
+            {children}
+            {/* </Authenticators> */}
           </Providers>
         </body>
       </Themes>
