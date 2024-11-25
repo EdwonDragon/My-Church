@@ -6,6 +6,7 @@ import { setLoading, setUser } from "@/store/slices/authSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import Menu from "../Menu/Menu";
 import { usePathname, useRouter } from "next/navigation";
+import Loading from "../Loading/Loading";
 
 const State = () => {
   const globalState = useAppSelector((state) => state.user);
@@ -28,7 +29,12 @@ const State = () => {
     }
   }, [pathname]); // Dependencia para que el efecto se ejecute cuando cambie userId o pathname
 
-  return <Menu />;
+  return (
+    <>
+      {globalState.isLoading && <Loading />}
+      <Menu />
+    </>
+  );
 };
 
 export default State;

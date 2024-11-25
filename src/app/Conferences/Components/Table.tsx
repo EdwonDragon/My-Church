@@ -11,6 +11,8 @@ import Modal from "@/components/Dialog/Dialog";
 import DeleteAction from "@/components/ActionsDataGrid/DeleteAction";
 import EditIcon from "@mui/icons-material/Edit";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import Loading from "@/components/Loading/Loading";
+import { showAlert } from "@/components/SweetAlert/Alert";
 
 // Genera el cliente utilizando el esquema
 const client = generateClient<Schema>();
@@ -21,12 +23,15 @@ const Table = () => {
   const [selectedConference, setSelectedConference] = useState<any | null>(
     null
   );
+  const [loading, setLoading] = useState(true);
 
+  const fetchConferences = async () => {
+    const { data } = await client.models.Conference.list();
+    setConferences(data);
+    setLoading(false);
+  };
   useEffect(() => {
-    const fetchConferences = async () => {
-      const { data } = await client.models.Conference.list();
-      setConferences(data);
-    };
+    setLoading(true);
     fetchConferences();
   }, []);
 
@@ -49,9 +54,29 @@ const Table = () => {
 
   // Eliminar conferencia
   const handleDelete = async (id: string) => {
-    await client.models.Conference.delete({ id });
-    const { data: updatedConferences } = await client.models.Conference.list();
-    setConferences(updatedConferences);
+    try {
+      // Intentar eliminar la conferencia
+      await client.models.Conference.delete({ id });
+
+      // Obtener la lista actualizada de conferencias
+      const { data: updatedConferences } =
+        await client.models.Conference.list();
+      setConferences(updatedConferences);
+
+      // Mostrar alerta de éxito
+      showAlert({
+        title: "¡Éxito!",
+        message: "La conferencia se eliminó correctamente.",
+        type: "success",
+      });
+    } catch (error) {
+      // Mostrar alerta de error
+      showAlert({
+        title: "¡Error!",
+        message: "Hubo un problema al eliminar la conferencia.",
+        type: "warning",
+      });
+    }
   };
 
   // Columnas de DataGrid
@@ -82,45 +107,51 @@ const Table = () => {
   ];
 
   return (
-    <Grid container spacing={2} p={3}>
-      {/* Button to trigger the creation modal */}
-      <Grid size={12}>
-        <Button
-          variant='contained'
-          color='secondary'
-          onClick={handleOpen}
-          sx={{ marginBottom: 2 }}
-          startIcon={<AddCircleOutlineIcon />}
-        >
-          Crear Conferencia
-        </Button>
-      </Grid>
+    <>
+      {loading && <Loading />}
 
-      {/* DataGrid with full width */}
-      <Grid size={12}>
-        <DataGrid
-          rows={conferences}
-          columns={columns}
-          slots={{ toolbar: GridToolbar }}
+      <Grid container spacing={2} p={3}>
+        {/* Button to trigger the creation modal */}
+        <Grid size={12}>
+          <Button
+            variant='contained'
+            color='secondary'
+            onClick={handleOpen}
+            sx={{ marginBottom: 2 }}
+            startIcon={<AddCircleOutlineIcon />}
+          >
+            Crear Conferencia
+          </Button>
+        </Grid>
+
+        {/* DataGrid with full width */}
+        <Grid size={12}>
+          <DataGrid
+            rows={conferences}
+            columns={columns}
+            slots={{ toolbar: GridToolbar }}
+          />
+        </Grid>
+
+        {/* Modal to create or edit conference */}
+        <Modal
+          title={
+            selectedConference ? "Editar Conferencia" : "Crear Conferencia"
+          }
+          children={
+            <Form
+              selectedConference={selectedConference}
+              setConferences={setConferences}
+              handleClose={handleClose}
+              setOpen={setOpen}
+              open={open}
+            />
+          }
+          setOpen={setOpen}
+          open={open}
         />
       </Grid>
-
-      {/* Modal to create or edit conference */}
-      <Modal
-        title={selectedConference ? "Editar Conferencia" : "Crear Conferencia"}
-        children={
-          <Form
-            selectedConference={selectedConference}
-            setConferences={setConferences}
-            handleClose={handleClose}
-            setOpen={setOpen}
-            open={open}
-          />
-        }
-        setOpen={setOpen}
-        open={open}
-      />
-    </Grid>
+    </>
   );
 };
 

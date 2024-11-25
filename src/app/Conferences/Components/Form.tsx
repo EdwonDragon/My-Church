@@ -7,6 +7,7 @@ import { generateClient } from "aws-amplify/data";
 import { Schema } from "../../../../amplify/data/resource";
 import { Button, DialogActions, TextField, Typography } from "@mui/material";
 import { validateAlphanumeric } from "@/validators";
+import { showAlert } from "@/components/SweetAlert/Alert";
 
 const client = generateClient<Schema>();
 interface FormProps {
@@ -32,19 +33,37 @@ const Form = ({
     defaultValues: { name: "", location: "", description: "" },
   });
   const onSubmit = async (data: any) => {
-    if (selectedConference) {
-      await client.models.Conference.update({
-        id: selectedConference.id,
-        ...data,
-      });
-    } else {
-      await client.models.Conference.create(data);
-    }
+    try {
+      if (selectedConference) {
+        await client.models.Conference.update({
+          id: selectedConference.id,
+          ...data,
+        });
+      } else {
+        await client.models.Conference.create(data);
+      }
 
-    const { data: updatedConferences } = await client.models.Conference.list();
-    setConferences(updatedConferences);
-    handleClose();
+      const { data: updatedConferences } =
+        await client.models.Conference.list();
+      setConferences(updatedConferences);
+
+      handleClose();
+
+      showAlert({
+        title: "¡Éxito!",
+        message: "Los datos se guardaron correctamente.",
+        type: "success",
+      });
+    } catch (error) {
+      handleClose();
+      showAlert({
+        title: "¡Error!",
+        message: "Hubo un problema al guardar los datos.",
+        type: "warning",
+      });
+    }
   };
+
   useEffect(() => {
     if (selectedConference) {
       reset({

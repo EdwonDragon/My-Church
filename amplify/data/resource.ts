@@ -7,11 +7,10 @@ const schema = a.schema({
   Conference: a.model({
     name: a.string().required(),
     location: a.string().required(),
-    date: a.date().required(),
     description: a.string().required(),
     departments: a.hasMany('DepartmentConferences', 'conferenceId'),
   }).authorization(allow => [
-    allow.groups(["SUPERADMIND"]).to(["read", "update", "create", "update"])
+    allow.groups(["SUPERADMIND"]).to(["read", "update", "create", "update", "delete"])
   ]),
 
   // Modelo para Departments (departamentos dentro de la conferencia)
@@ -45,7 +44,7 @@ const schema = a.schema({
     positionId: a.id().required(),
     position: a.belongsTo('PositionConferences', 'positionId'),  // Relación a PositionConferences
   }).authorization(allow => [
-    allow.groups(["SUPERADMIND"]).to(["read"])
+    allow.groups(["SUPERADMIND"]).to(["read", "update", "create", "update"])
   ]),
 });
 

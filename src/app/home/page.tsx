@@ -1,20 +1,17 @@
 "use client";
+import Loading from "@/components/Loading/Loading";
 import { useAppSelector } from "@/store/hooks";
-import { Container, Typography, CircularProgress, Button } from "@mui/material";
-
+import { Typography, Button } from "@mui/material";
+import Grid from "@mui/material/Grid2";
 const Home = () => {
   const globalState = useAppSelector((state) => state.user);
 
-  if (globalState.isLoading) {
-    return <CircularProgress />;
-  }
-
   return (
-    <Container sx={{ textAlign: "center", mt: 4 }}>
-      {globalState.isLoading ? (
-        <CircularProgress />
-      ) : (
-        <div>
+    <>
+      {globalState.isLoading && <Loading />}
+      <Grid container spacing={2} p={3}>
+        {/* Button to trigger the creation modal */}
+        <Grid size={12}>
           <Typography variant='h4' gutterBottom>
             Welcome, {globalState.user?.username}
           </Typography>
@@ -24,9 +21,9 @@ const Home = () => {
           <Button variant='contained' color='primary'>
             Hisdf
           </Button>
-        </div>
-      )}
-    </Container>
+        </Grid>
+      </Grid>
+    </>
   );
 };
 
