@@ -6,7 +6,7 @@ import { Button, IconButton } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { generateClient } from "aws-amplify/data";
 import { Schema } from "../../../../amplify/data/resource";
-import Form from "./Form";
+import Form from "./Form"; // El formulario para crear/editar módulos
 import Modal from "@/components/Dialog/Dialog";
 import DeleteAction from "@/components/ActionsDataGrid/DeleteAction";
 import EditIcon from "@mui/icons-material/Edit";
@@ -14,25 +14,25 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import Loading from "@/components/Loading/Loading";
 import { showAlert } from "@/components/SweetAlert/Alert";
 
-// Genera el cliente utilizando el esquema
+// Generar cliente utilizando el esquema
 const client = generateClient<Schema>();
 
 const Table = () => {
-  const [conferences, setConferences] = useState<any[]>([]); // Conferencias cargadas
+  const [modules, setModules] = useState<any[]>([]); // Módulos cargados
   const [open, setOpen] = useState(false); // Modal abierto
-  const [selectedConference, setSelectedConference] = useState<any | null>(
-    null
-  );
+  const [selectedModule, setSelectedModule] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchConferences = async () => {
-    const { data } = await client.models.Conference.list();
-    setConferences(data);
+  // Cargar los módulos desde la API
+  const fetchModules = async () => {
+    const { data } = await client.models.Modules.list();
+    setModules(data);
     setLoading(false);
   };
+
   useEffect(() => {
     setLoading(true);
-    fetchConferences();
+    fetchModules();
   }, []);
 
   // Cerrar modal
@@ -40,34 +40,33 @@ const Table = () => {
     setOpen(false); // Cerrar modal
   };
 
-  // Abrir modal para crear conferencia
+  // Abrir modal para crear módulo
   const handleOpen = () => {
-    setSelectedConference(null); // Restablecer conferencia seleccionada
+    setSelectedModule(null); // Restablecer módulo seleccionado
     setOpen(true);
   };
 
-  // Abrir modal para editar conferencia
-  const handleEdit = (conference: any) => {
-    setSelectedConference(conference);
+  // Abrir modal para editar módulo
+  const handleEdit = (module: any) => {
+    setSelectedModule(module);
     setOpen(true);
   };
 
-  // Eliminar conferencia
+  // Eliminar módulo
   const handleDelete = async (id: string) => {
     setLoading(true);
     try {
-      // Intentar eliminar la conferencia
-      await client.models.Conference.delete({ id });
+      // Intentar eliminar el módulo
+      await client.models.Modules.delete({ id });
 
-      // Obtener la lista actualizada de conferencias
-      const { data: updatedConferences } =
-        await client.models.Conference.list();
-      setConferences(updatedConferences);
+      // Obtener la lista actualizada de módulos
+      const { data: updatedModules } = await client.models.Modules.list();
+      setModules(updatedModules);
       setLoading(false);
       // Mostrar alerta de éxito
       showAlert({
         title: "¡Éxito!",
-        message: "La conferencia se eliminó correctamente.",
+        message: "El módulo se eliminó correctamente.",
         type: "success",
       });
     } catch (error) {
@@ -75,7 +74,7 @@ const Table = () => {
       // Mostrar alerta de error
       showAlert({
         title: "¡Error!",
-        message: "Hubo un problema al eliminar la conferencia.",
+        message: "Hubo un problema al eliminar el módulo.",
         type: "warning",
       });
     }
@@ -84,9 +83,8 @@ const Table = () => {
   // Columnas de DataGrid
   const columns = [
     { field: "name", headerName: "Nombre", flex: 1 },
-    { field: "location", headerName: "Ubicación", flex: 1 },
+    { field: "route", headerName: "Ruta", flex: 1 },
 
-    // { field: "logo", headerName: "logo", flex: 1 },
     {
       field: "actions",
       headerName: "Acciones",
@@ -94,7 +92,7 @@ const Table = () => {
       renderCell: (params: any) => (
         <>
           <IconButton
-            title={"Editar conferencia"}
+            title={"Editar módulo"}
             onClick={() => handleEdit(params.row)}
             aria-label='Editar'
             size='large'
@@ -113,7 +111,7 @@ const Table = () => {
       {loading && <Loading />}
 
       <Grid container spacing={2} p={3}>
-        {/* Button to trigger the creation modal */}
+        {/* Botón para abrir el modal de creación */}
         <Grid size={12}>
           <Button
             variant='contained'
@@ -122,28 +120,26 @@ const Table = () => {
             sx={{ marginBottom: 2 }}
             startIcon={<AddCircleOutlineIcon />}
           >
-            Crear Conferencia
+            Crear Módulo
           </Button>
         </Grid>
 
-        {/* DataGrid with full width */}
+        {/* DataGrid para mostrar los módulos */}
         <Grid size={12}>
           <DataGrid
-            rows={conferences}
+            rows={modules}
             columns={columns}
             slots={{ toolbar: GridToolbar }}
           />
         </Grid>
 
-        {/* Modal to create or edit conference */}
+        {/* Modal para crear o editar módulo */}
         <Modal
-          title={
-            selectedConference ? "Editar Conferencia" : "Crear Conferencia"
-          }
+          title={selectedModule ? "Editar Módulo" : "Crear Módulo"}
           children={
             <Form
-              selectedConference={selectedConference}
-              setConferences={setConferences}
+              selectedModule={selectedModule}
+              setModules={setModules}
               handleClose={handleClose}
               setOpen={setOpen}
               open={open}

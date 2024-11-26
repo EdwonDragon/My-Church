@@ -6,6 +6,7 @@ import AppBarComponent from "./AppBar";
 import MiniDrawer from "./CustomDrawer";
 import BreadCrumb from "../BreadCrumb/BreadCrumb";
 import PublicIcon from "@mui/icons-material/Public";
+import ViewModuleIcon from "@mui/icons-material/ViewModule";
 const Menu = () => {
   const [open, setOpen] = React.useState(false);
   const handleDrawerOpen = () => setOpen(true);
@@ -15,6 +16,11 @@ const Menu = () => {
       text: "Conferences",
       icon: <PublicIcon htmlColor='white' />,
       route: "/Conferences",
+    },
+    {
+      text: "Módulos",
+      icon: <ViewModuleIcon htmlColor='white' />,
+      route: "/Modules",
     },
   ];
   return (

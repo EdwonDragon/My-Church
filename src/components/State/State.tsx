@@ -22,7 +22,7 @@ const State = () => {
   }, []);
 
   useEffect(() => {
-    const permisions = ["/Conferences", "/"];
+    const permisions = ["/Conferences", "/", "/Modules"];
     // Aquí verificamos si el userId es el que estamos buscando
     if (!permisions.includes(pathname)) {
       router.push("/");

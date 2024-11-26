@@ -5,7 +5,7 @@ export const validateAlphanumeric = (
   const rules = {
     ...(isRequired && { required: `${label} es requerido` }),
     pattern: {
-      value: /^[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ\s.,\-():;]+$/,
+      value: /^[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ\s.,\-():;/]+$/,
       message: `${label} solo puede contener caracteres alfanuméricos`,
     },
   };
