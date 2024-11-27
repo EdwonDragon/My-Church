@@ -9,6 +9,7 @@ interface AuthSignInDetails {
 interface AuthUser {
     username: string;
     userId: string;
+    role?: string;
     signInDetails?: AuthSignInDetails;
 }
 

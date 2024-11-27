@@ -22,7 +22,9 @@ const BreadCrumb = ({ open }: BreadCrumProps) => {
     "/": "Inicio",
     "/home": "Inicio",
     "/home/": "Inicio",
-    "/Conferences": "Conferencias",
+    "/Zones": "Zonas",
+    "/Modules": "Módulos",
+    "/Users": "Usuarios",
   };
 
   // Get the current page name from the route

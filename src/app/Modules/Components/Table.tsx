@@ -23,17 +23,61 @@ const Table = () => {
   const [selectedModule, setSelectedModule] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Cargar los módulos desde la API
   const fetchModules = async () => {
-    const { data } = await client.models.Modules.list();
-    setModules(data);
-    setLoading(false);
+    setLoading(true);
+    try {
+      let allModules: any[] = [];
+      let nextToken: string | null = null;
+
+      do {
+        const rawResponse = await client.models.Modules.list({
+          nextToken,
+        });
+        const response: { data: any[]; nextToken: string | null } = {
+          data: rawResponse.data,
+          nextToken: rawResponse.nextToken || null, // Convertimos undefined a null
+        };
+
+        allModules = [...allModules, ...response.data];
+        nextToken = response.nextToken;
+      } while (nextToken);
+
+      const enrichedModules = await Promise.all(
+        allModules.map(async (module) => {
+          const enrichedModule: any = { ...module };
+
+          if (module.conference) {
+            const { data: conferenceData } = await module.conference();
+            enrichedModule.conferenceData = conferenceData;
+          }
+
+          if (module.district) {
+            const { data: districtData } = await module.district();
+            enrichedModule.districtData = districtData;
+          }
+
+          return enrichedModule;
+        })
+      );
+
+      setModules(enrichedModules);
+    } catch (error) {
+      showAlert({
+        title: "¡Error!",
+        message: "Hubo un problema al cargar las conferencias.",
+        type: "warning",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    setLoading(true);
-    fetchModules();
-  }, []);
+    if (!open) {
+      setLoading(true);
+      fetchModules();
+    }
+  }, [open]);
 
   // Cerrar modal
   const handleClose = () => {
@@ -89,20 +133,22 @@ const Table = () => {
       field: "actions",
       headerName: "Acciones",
       flex: 1,
-      renderCell: (params: any) => (
-        <>
-          <IconButton
-            title={"Editar módulo"}
-            onClick={() => handleEdit(params.row)}
-            aria-label='Editar'
-            size='large'
-          >
-            <EditIcon color='primary' />
-          </IconButton>
+      renderCell: (params: any) => {
+        return (
+          <>
+            <IconButton
+              title={"Editar módulo"}
+              onClick={() => handleEdit(params.row)}
+              aria-label='Editar'
+              size='large'
+            >
+              <EditIcon color='primary' />
+            </IconButton>
 
-          <DeleteAction id={params.row.id} onDelete={handleDelete} />
-        </>
-      ),
+            <DeleteAction id={params.row.id} onDelete={handleDelete} />
+          </>
+        );
+      },
     },
   ];
 

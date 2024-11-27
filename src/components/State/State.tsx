@@ -15,6 +15,7 @@ const State = () => {
   const pathname = usePathname();
   const router = useRouter();
   useEffect(() => {
+    console.log(user);
     if (!globalState.user) {
       dispatch(setLoading());
       dispatch(setUser(user));
@@ -22,11 +23,13 @@ const State = () => {
   }, []);
 
   useEffect(() => {
-    const permisions = ["/Conferences", "/", "/Modules"];
-    // Aquí verificamos si el userId es el que estamos buscando
-    if (!permisions.includes(pathname)) {
-      router.push("/");
+    if (globalState.user?.role) {
+      const permisions = ["/Conferences", "/", "/Modules"];
+      if (!permisions.includes(pathname)) {
+        router.push("/");
+      }
     }
+    // Aquí verificamos si el userId es el que estamos buscando
   }, [pathname]); // Dependencia para que el efecto se ejecute cuando cambie userId o pathname
 
   return (

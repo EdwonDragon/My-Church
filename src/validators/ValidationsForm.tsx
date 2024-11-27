@@ -12,6 +12,18 @@ export const validateAlphanumeric = (
   return rules;
 };
 
+export const validatePassword = (label: string, isRequired: boolean = true) => {
+  const rules = {
+    ...(isRequired && { required: `${label} es requerido` }),
+    pattern: {
+      value:
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&+])[A-Za-z\d@$!%*?&+]{8,}$/,
+      message: `${label} debe tener al menos 8 caracteres, incluyendo una letra mayúscula, una minúscula, un número y un carácter especial (@$!%*?&+)`,
+    },
+  };
+  return rules;
+};
+
 export const validateNumeric = (label: string, isRequired: boolean = true) => {
   const rules = {
     ...(isRequired && { required: `${label} es requerido` }),

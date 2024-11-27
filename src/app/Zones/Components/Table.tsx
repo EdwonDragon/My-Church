@@ -14,74 +14,91 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import Loading from "@/components/Loading/Loading";
 import { showAlert } from "@/components/SweetAlert/Alert";
 
-// Genera el cliente utilizando el esquema
 const client = generateClient<Schema>();
 
 const Table = () => {
-  const [conferences, setConferences] = useState<any[]>([]); // Conferencias cargadas
-  const [open, setOpen] = useState(false); // Modal abierto
-  const [selectedConference, setSelectedConference] = useState<any | null>(
-    null
-  );
+  const [zone, setZones] = useState<any[]>([]);
+  const [open, setOpen] = useState(false);
+  const [selectedZone, setSelectedZone] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchConferences = async () => {
-    const { data } = await client.models.Conference.list();
-    setConferences(data);
-    setLoading(false);
+  const fetchZones = async () => {
+    setLoading(true);
+    try {
+      let allZones: any[] = [];
+      let nextToken: string | null = null;
+
+      do {
+        const rawResponse = await client.models.Zone.list({
+          nextToken,
+        });
+
+        const response: { data: any[]; nextToken: string | null } = {
+          data: rawResponse.data,
+          nextToken: rawResponse.nextToken || null, // Convertimos undefined a null
+        };
+
+        allZones = [...allZones, ...response.data];
+        nextToken = response.nextToken;
+      } while (nextToken); // Continúa mientras haya un nextToken
+
+      setZones(allZones);
+    } catch (error) {
+      setLoading(false);
+      showAlert({
+        title: "¡Error!",
+        message: "Hubo un problema al cargar las zones.",
+        type: "warning",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
+
   useEffect(() => {
     setLoading(true);
-    fetchConferences();
+    fetchZones();
   }, []);
 
-  // Cerrar modal
   const handleClose = () => {
-    setOpen(false); // Cerrar modal
+    setOpen(false);
   };
 
-  // Abrir modal para crear conferencia
   const handleOpen = () => {
-    setSelectedConference(null); // Restablecer conferencia seleccionada
+    setSelectedZone(null);
     setOpen(true);
   };
 
-  // Abrir modal para editar conferencia
-  const handleEdit = (conference: any) => {
-    setSelectedConference(conference);
+  const handleEdit = (Zone: any) => {
+    setSelectedZone(Zone);
     setOpen(true);
   };
 
-  // Eliminar conferencia
   const handleDelete = async (id: string) => {
     setLoading(true);
     try {
-      // Intentar eliminar la conferencia
-      await client.models.Conference.delete({ id });
+      await client.models.Zone.delete({ id });
 
-      // Obtener la lista actualizada de conferencias
-      const { data: updatedConferences } =
-        await client.models.Conference.list();
-      setConferences(updatedConferences);
+      const { data: updatedZones } = await client.models.Zone.list();
+      setZones(updatedZones);
       setLoading(false);
-      // Mostrar alerta de éxito
+
       showAlert({
         title: "¡Éxito!",
-        message: "La conferencia se eliminó correctamente.",
+        message: "La zone se eliminó correctamente.",
         type: "success",
       });
     } catch (error) {
       setLoading(false);
-      // Mostrar alerta de error
+
       showAlert({
         title: "¡Error!",
-        message: "Hubo un problema al eliminar la conferencia.",
+        message: "Hubo un problema al eliminar la zone.",
         type: "warning",
       });
     }
   };
 
-  // Columnas de DataGrid
   const columns = [
     { field: "name", headerName: "Nombre", flex: 1 },
     { field: "location", headerName: "Ubicación", flex: 1 },
@@ -94,7 +111,7 @@ const Table = () => {
       renderCell: (params: any) => (
         <>
           <IconButton
-            title={"Editar conferencia"}
+            title={"Editar zone"}
             onClick={() => handleEdit(params.row)}
             aria-label='Editar'
             size='large'
@@ -122,28 +139,26 @@ const Table = () => {
             sx={{ marginBottom: 2 }}
             startIcon={<AddCircleOutlineIcon />}
           >
-            Crear Conferencia
+            Crear zone
           </Button>
         </Grid>
 
         {/* DataGrid with full width */}
         <Grid size={12}>
           <DataGrid
-            rows={conferences}
+            rows={zone}
             columns={columns}
             slots={{ toolbar: GridToolbar }}
           />
         </Grid>
 
-        {/* Modal to create or edit conference */}
+        {/* Modal to create or edit Zone */}
         <Modal
-          title={
-            selectedConference ? "Editar Conferencia" : "Crear Conferencia"
-          }
+          title={selectedZone ? "Editar zone" : "Crear zone"}
           children={
             <Form
-              selectedConference={selectedConference}
-              setConferences={setConferences}
+              selectedZone={selectedZone}
+              setZones={setZones}
               handleClose={handleClose}
               setOpen={setOpen}
               open={open}

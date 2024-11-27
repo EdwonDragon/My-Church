@@ -4,14 +4,14 @@ import withReactContent from "sweetalert2-react-content";
 const MySwal = withReactContent(Swal);
 
 type ShowAlertProps = {
-  title?: string; // Título de la alerta, acepta JSX
-  message?: string; // Mensaje adicional
-  type?: SweetAlertIcon; // Tipo de alerta: success, error, warning, info
-  showLoading?: boolean; // Muestra animación de carga
-  callback?: (result: SweetAlertResult) => void; // Callback al cerrar la alerta
+  title?: string;
+  message?: string;
+  type?: SweetAlertIcon;
+  showLoading?: boolean;
+  callback?: (result: SweetAlertResult) => void;
 };
 
-// Función para mostrar una alerta
+
 export const showAlert = ({
   title = "",
   message = "",
@@ -28,7 +28,18 @@ export const showAlert = ({
         MySwal.showLoading();
       }
     },
+    customClass: {
+      popup: 'custom-swal-popup',
+    },
+    didClose: () => {
+
+    },
   }).then((result) => {
-    if (callback) callback(result); // Ejecuta callback si se pasa
+    if (callback) callback(result);
   });
 };
+
+
+
+
+

@@ -1,26 +1,32 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import Grid from "@mui/material/Grid2";
 import { generateClient } from "aws-amplify/data";
 import { Schema } from "../../../../amplify/data/resource";
-import { Button, DialogActions, TextField, Typography } from "@mui/material";
-import { validateAlphanumeric } from "@/validators";
+import {
+  Autocomplete,
+  Button,
+  DialogActions,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { validateAlphanumeric, validateSelects } from "@/validators";
 import { showAlert } from "@/components/SweetAlert/Alert";
 import Loading from "@/components/Loading/Loading";
-
+import types from "../Helpers/types.json";
 const client = generateClient<Schema>();
 interface FormProps {
-  selectedConference: Record<string, any>;
-  setConferences: React.Dispatch<React.SetStateAction<any[]>>;
+  selectedZone: Record<string, any>;
+  setZones: React.Dispatch<React.SetStateAction<any[]>>;
   handleClose: () => void;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   open: boolean;
 }
 const Form = ({
-  selectedConference,
-  setConferences,
+  selectedZone,
+  setZones,
   handleClose,
   setOpen,
   open,
@@ -29,27 +35,27 @@ const Form = ({
     handleSubmit,
     reset,
     register,
+    control,
     formState: { errors },
   } = useForm({
-    defaultValues: { name: "", location: "", logo: "" },
+    defaultValues: { name: "", location: "", logo: "", type: "" },
   });
 
   const [loading, setLoading] = useState(true);
   const onSubmit = async (data: any) => {
     setLoading(true);
     try {
-      if (selectedConference) {
-        await client.models.Conference.update({
-          id: selectedConference.id,
+      if (selectedZone) {
+        await client.models.Zone.update({
+          id: selectedZone.id,
           ...data,
         });
       } else {
-        await client.models.Conference.create(data);
+        await client.models.Zone.create(data);
       }
 
-      const { data: updatedConferences } =
-        await client.models.Conference.list();
-      setConferences(updatedConferences);
+      const { data: updatedZones } = await client.models.Zone.list();
+      setZones(updatedZones);
 
       handleClose();
       setLoading(false);
@@ -71,11 +77,11 @@ const Form = ({
 
   useEffect(() => {
     setLoading(true);
-    if (selectedConference) {
+    if (selectedZone) {
       reset({
-        logo: selectedConference.logo,
-        location: selectedConference.location,
-        name: selectedConference.name,
+        logo: selectedZone.logo,
+        location: selectedZone.location,
+        name: selectedZone.name,
       });
     }
     setLoading(false);
@@ -84,7 +90,7 @@ const Form = ({
   return (
     <>
       {loading && <Loading />}
-      <Grid container spacing={2}>
+      <Grid container spacing={2} padding={2}>
         <Grid size={12}>
           <TextField
             variant='outlined'
@@ -106,7 +112,34 @@ const Form = ({
             error={!!errors.location}
           />
         </Grid>
-
+        <Grid size={12}>
+          <Controller
+            name='type'
+            control={control}
+            rules={validateSelects("type", false)}
+            render={({ field }) => (
+              <Autocomplete
+                value={
+                  types.find((option) => option.value === field.value) || null
+                }
+                options={types}
+                getOptionLabel={(option) => option.name}
+                onChange={(_, value) =>
+                  field.onChange(value ? value.value : "")
+                }
+                fullWidth
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    helperText={errors.type?.message}
+                    label='Zone'
+                    error={!!errors.type}
+                  />
+                )}
+              />
+            )}
+          />
+        </Grid>
         <Grid size={12}>
           <TextField
             variant='outlined'
@@ -119,11 +152,19 @@ const Form = ({
         </Grid>
         <Grid size={12}>
           <DialogActions>
-            <Button onClick={() => setOpen(false)} color='secondary'>
+            <Button
+              onClick={() => setOpen(false)}
+              variant='contained'
+              color='warning'
+            >
               Cancelar
             </Button>
-            <Button onClick={handleSubmit(onSubmit)} color='primary'>
-              {selectedConference ? "Actualizar" : "Crear"}
+            <Button
+              onClick={handleSubmit(onSubmit)}
+              variant='contained'
+              color='primary'
+            >
+              {selectedZone ? "Actualizar" : "Crear"}
             </Button>
           </DialogActions>
         </Grid>

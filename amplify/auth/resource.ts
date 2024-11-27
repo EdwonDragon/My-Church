@@ -9,5 +9,5 @@ export const auth = defineAuth({
     email: true,
   },
 
-  groups: ["SUPERADMIND", "ADMINS", "EDITORS"],
+  groups: ["SUPERADMIND", "OWNER", "OBISP", "PASTORS", "SUPER"],
 });

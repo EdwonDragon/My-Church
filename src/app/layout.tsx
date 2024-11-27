@@ -3,7 +3,7 @@ import Providers from "@/store/providers";
 import Authenticators from "@/components/Auth/Authenticators";
 import Themes from "@/theme/themes";
 import State from "../components/State/State";
-
+import "@/theme/sweet.css";
 export const metadata = {
   title: "My Church",
   icons: {
