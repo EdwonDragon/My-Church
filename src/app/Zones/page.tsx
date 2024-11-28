@@ -1,7 +1,8 @@
 import { Typography } from "@mui/material";
-import Table from "./Components/Table";
+
 import PublicIcon from "@mui/icons-material/Public";
 import Grid from "@mui/material/Grid2";
+import Table from "./Components/Table";
 const Zones = () => {
   return (
     <>

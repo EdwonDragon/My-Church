@@ -3,60 +3,56 @@
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import Grid from "@mui/material/Grid2";
-import { generateClient } from "aws-amplify/data";
-import { Schema } from "../../../../amplify/data/resource";
-import {
-  Autocomplete,
-  Button,
-  DialogActions,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Autocomplete, TextField } from "@mui/material";
 import { validateAlphanumeric, validateSelects } from "@/validators";
 import { showAlert } from "@/components/SweetAlert/Alert";
 import Loading from "@/components/Loading/Loading";
 import types from "../Helpers/types.json";
-const client = generateClient<Schema>();
+import { client } from "@/helpers/Client";
+import { CheckErrors } from "@/helpers/CheckErrors";
+import ButtonsForm from "../../../components/ButtonsForm/ButtonsForm";
+import { UploadFile } from "@/components/UploadFile/UploadFile";
+
 interface FormProps {
   selectedZone: Record<string, any>;
-  setZones: React.Dispatch<React.SetStateAction<any[]>>;
   handleClose: () => void;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   open: boolean;
 }
-const Form = ({
-  selectedZone,
-  setZones,
-  handleClose,
-  setOpen,
-  open,
-}: FormProps) => {
+
+const Form = ({ selectedZone, handleClose, setOpen, open }: FormProps) => {
   const {
     handleSubmit,
     reset,
     register,
     control,
+    setValue,
     formState: { errors },
   } = useForm({
-    defaultValues: { name: "", location: "", logo: "", type: "" },
+    defaultValues: { name: "", location: "", logo: [], type: "" },
   });
 
   const [loading, setLoading] = useState(true);
+  const [files, setFiles]: any = useState({});
+
+  useEffect(() => {
+    const array: any = Object.keys(files).map((key) => key);
+    setValue("logo", array);
+  }, [files]);
+
   const onSubmit = async (data: any) => {
     setLoading(true);
     try {
+      let newData;
       if (selectedZone) {
-        await client.models.Zone.update({
+        newData = await client.models.Zone.update({
           id: selectedZone.id,
           ...data,
         });
       } else {
-        await client.models.Zone.create(data);
+        newData = await client.models.Zone.create(data);
       }
-
-      const { data: updatedZones } = await client.models.Zone.list();
-      setZones(updatedZones);
-
+      await CheckErrors(newData);
       handleClose();
       setLoading(false);
       showAlert({
@@ -64,12 +60,12 @@ const Form = ({
         message: "Los datos se guardaron correctamente.",
         type: "success",
       });
-    } catch (error) {
+    } catch (error: any) {
       setLoading(false);
       handleClose();
       showAlert({
         title: "¡Error!",
-        message: "Hubo un problema al guardar los datos.",
+        message: error,
         type: "warning",
       });
     }
@@ -79,10 +75,17 @@ const Form = ({
     setLoading(true);
     if (selectedZone) {
       reset({
-        logo: selectedZone.logo,
         location: selectedZone.location,
         name: selectedZone.name,
+        type: selectedZone.type,
       });
+      if (selectedZone.logo.length > 0) {
+        setFiles({
+          [selectedZone.logo]: {
+            status: "success",
+          },
+        });
+      }
     }
     setLoading(false);
   }, [open]);
@@ -141,32 +144,23 @@ const Form = ({
           />
         </Grid>
         <Grid size={12}>
-          <TextField
-            variant='outlined'
-            {...register("logo", validateAlphanumeric("Logo"))}
-            label={"Logo"}
-            fullWidth
-            helperText={errors.logo?.message}
-            error={!!errors.logo}
+          <UploadFile
+            max={1}
+            files={files}
+            setFiles={setFiles}
+            title={"Logo"}
+            acceptedFileTypes={["*"]}
+            deleteFiles={true}
           />
         </Grid>
+
         <Grid size={12}>
-          <DialogActions>
-            <Button
-              onClick={() => setOpen(false)}
-              variant='contained'
-              color='warning'
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSubmit(onSubmit)}
-              variant='contained'
-              color='primary'
-            >
-              {selectedZone ? "Actualizar" : "Crear"}
-            </Button>
-          </DialogActions>
+          <ButtonsForm
+            setOpen={setOpen}
+            handleSubmit={handleSubmit}
+            onSubmit={onSubmit}
+            selected={selectedZone}
+          />
         </Grid>
       </Grid>
     </>

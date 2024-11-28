@@ -27,7 +27,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/components/Auth/Authenticators.jsx"
+    "src/components/Auth/Authenticators.jsx",
+    "src/components/UploadFile/UploadFile.jsx"
   ],
   "exclude": ["node_modules", "amplify"]
 }

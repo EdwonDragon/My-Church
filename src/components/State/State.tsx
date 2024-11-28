@@ -15,7 +15,6 @@ const State = () => {
   const pathname = usePathname();
   const router = useRouter();
   useEffect(() => {
-    console.log(user);
     if (!globalState.user) {
       dispatch(setLoading());
       dispatch(setUser(user));
@@ -29,8 +28,7 @@ const State = () => {
         router.push("/");
       }
     }
-    // Aquí verificamos si el userId es el que estamos buscando
-  }, [pathname]); // Dependencia para que el efecto se ejecute cuando cambie userId o pathname
+  }, [pathname]);
 
   return (
     <>

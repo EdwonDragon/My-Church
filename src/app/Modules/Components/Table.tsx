@@ -4,24 +4,30 @@ import React, { useState, useEffect } from "react";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { Button, IconButton } from "@mui/material";
 import Grid from "@mui/material/Grid2";
-import { generateClient } from "aws-amplify/data";
-import { Schema } from "../../../../amplify/data/resource";
-import Form from "./Form"; // El formulario para crear/editar módulos
-import Modal from "@/components/Dialog/Dialog";
+import Form from "./Form";
+import CustomDialog from "@/components/CustomDialog/CustomDialog";
 import DeleteAction from "@/components/ActionsDataGrid/DeleteAction";
 import EditIcon from "@mui/icons-material/Edit";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import Loading from "@/components/Loading/Loading";
 import { showAlert } from "@/components/SweetAlert/Alert";
-
-// Generar cliente utilizando el esquema
-const client = generateClient<Schema>();
+import { client } from "@/helpers/Client";
+import { CheckErrors } from "@/helpers/CheckErrors";
 
 const Table = () => {
-  const [modules, setModules] = useState<any[]>([]); // Módulos cargados
-  const [open, setOpen] = useState(false); // Modal abierto
+  const [modules, setModules] = useState<any[]>([]);
+  const [open, setOpen] = useState(false);
   const [selectedModule, setSelectedModule] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const sub = client.models.Modules.observeQuery().subscribe({
+      next: ({ items, isSynced }) => {
+        setModules([...items]);
+      },
+    });
+    return () => sub.unsubscribe();
+  }, []);
 
   const fetchModules = async () => {
     setLoading(true);
@@ -35,8 +41,10 @@ const Table = () => {
         });
         const response: { data: any[]; nextToken: string | null } = {
           data: rawResponse.data,
-          nextToken: rawResponse.nextToken || null, // Convertimos undefined a null
+          nextToken: rawResponse.nextToken || null,
         };
+
+        await CheckErrors(response);
 
         allModules = [...allModules, ...response.data];
         nextToken = response.nextToken;
@@ -61,10 +69,10 @@ const Table = () => {
       );
 
       setModules(enrichedModules);
-    } catch (error) {
+    } catch (error: any) {
       showAlert({
         title: "¡Error!",
-        message: "Hubo un problema al cargar las conferencias.",
+        message: error,
         type: "warning",
       });
     } finally {
@@ -73,58 +81,48 @@ const Table = () => {
   };
 
   useEffect(() => {
-    if (!open) {
-      setLoading(true);
-      fetchModules();
-    }
+    setLoading(true);
+    fetchModules();
   }, [open]);
 
-  // Cerrar modal
   const handleClose = () => {
-    setOpen(false); // Cerrar modal
+    setOpen(false);
   };
 
-  // Abrir modal para crear módulo
   const handleOpen = () => {
-    setSelectedModule(null); // Restablecer módulo seleccionado
+    setSelectedModule(null);
     setOpen(true);
   };
 
-  // Abrir modal para editar módulo
   const handleEdit = (module: any) => {
     setSelectedModule(module);
     setOpen(true);
   };
 
-  // Eliminar módulo
   const handleDelete = async (id: string) => {
     setLoading(true);
     try {
-      // Intentar eliminar el módulo
-      await client.models.Modules.delete({ id });
+      const deleteData = await client.models.Modules.delete({ id });
+      await CheckErrors(deleteData);
 
-      // Obtener la lista actualizada de módulos
-      const { data: updatedModules } = await client.models.Modules.list();
-      setModules(updatedModules);
       setLoading(false);
-      // Mostrar alerta de éxito
+
       showAlert({
         title: "¡Éxito!",
         message: "El módulo se eliminó correctamente.",
         type: "success",
       });
-    } catch (error) {
+    } catch (error: any) {
       setLoading(false);
-      // Mostrar alerta de error
+
       showAlert({
         title: "¡Error!",
-        message: "Hubo un problema al eliminar el módulo.",
+        message: error,
         type: "warning",
       });
     }
   };
 
-  // Columnas de DataGrid
   const columns = [
     { field: "name", headerName: "Nombre", flex: 1 },
     { field: "route", headerName: "Ruta", flex: 1 },
@@ -157,7 +155,6 @@ const Table = () => {
       {loading && <Loading />}
 
       <Grid container spacing={2} p={3}>
-        {/* Botón para abrir el modal de creación */}
         <Grid size={12}>
           <Button
             variant='contained'
@@ -170,7 +167,6 @@ const Table = () => {
           </Button>
         </Grid>
 
-        {/* DataGrid para mostrar los módulos */}
         <Grid size={12}>
           <DataGrid
             rows={modules}
@@ -179,8 +175,7 @@ const Table = () => {
           />
         </Grid>
 
-        {/* Modal para crear o editar módulo */}
-        <Modal
+        <CustomDialog
           title={selectedModule ? "Editar Módulo" : "Crear Módulo"}
           children={
             <Form

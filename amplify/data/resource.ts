@@ -6,7 +6,7 @@ const schema = a.schema({
     name: a.string().required(),
     type: a.string().required(),
     location: a.string().required(),
-    logo: a.string().required(),
+    logo: a.string().required().array(),
     ownerId: a.id(),
     owner: a.belongsTo('Users', 'ownerId'),
     departments: a.hasMany('Department', 'zoneId'),
@@ -53,7 +53,6 @@ const schema = a.schema({
     zoneOwner: a.hasOne('Zone', 'ownerId'),
     zoneId: a.id(),
     zone: a.belongsTo('Zone', 'zoneId'),
-
   })
     .secondaryIndexes((index) => [index("role")])
     .authorization(allow => [

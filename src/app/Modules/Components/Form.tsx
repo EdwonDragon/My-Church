@@ -3,14 +3,14 @@
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import Grid from "@mui/material/Grid2";
-import { generateClient } from "aws-amplify/data";
-import { Schema } from "../../../../amplify/data/resource";
 import { Autocomplete, Button, DialogActions, TextField } from "@mui/material";
 import { validateAlphanumeric, validateSelects } from "@/validators";
 import { showAlert } from "@/components/SweetAlert/Alert";
 import Loading from "@/components/Loading/Loading";
 import zones from "../Helpers/zones.json";
-const client = generateClient<Schema>();
+import { client } from "@/helpers/Client";
+import { CheckErrors } from "@/helpers/CheckErrors";
+import ButtonsForm from "@/components/ButtonsForm/ButtonsForm";
 
 interface FormProps {
   selectedModule: Record<string, any> | null;
@@ -46,16 +46,16 @@ const ModuleForm = ({
 
     setLoading(true);
     try {
+      let newData;
       if (selectedModule) {
-        await client.models.Modules.update({
+        newData = await client.models.Modules.update({
           id: selectedModule.id,
           ...data,
         });
       } else {
-        const updatMo = await client.models.Modules.create(data);
-        console.log(data);
+        newData = await client.models.Modules.create(data);
       }
-
+      await CheckErrors(newData);
       handleClose();
       setLoading(false);
       showAlert({
@@ -63,12 +63,12 @@ const ModuleForm = ({
         message: "El módulo se guardó correctamente.",
         type: "success",
       });
-    } catch (error) {
+    } catch (error: any) {
       setLoading(false);
       handleClose();
       showAlert({
         title: "¡Error!",
-        message: "Hubo un problema al guardar el módulo.",
+        message: error,
         type: "warning",
       });
     }
@@ -208,22 +208,12 @@ const ModuleForm = ({
         )}
 
         <Grid size={12}>
-          <DialogActions>
-            <Button
-              onClick={() => setOpen(false)}
-              color='warning'
-              variant='contained'
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSubmit(onSubmit)}
-              color='primary'
-              variant='contained'
-            >
-              {selectedModule ? "Actualizar" : "Crear"}
-            </Button>
-          </DialogActions>
+          <ButtonsForm
+            setOpen={setOpen}
+            handleSubmit={handleSubmit}
+            onSubmit={onSubmit}
+            selected={selectedModule}
+          />
         </Grid>
       </Grid>
     </>

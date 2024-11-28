@@ -4,23 +4,35 @@ import React, { useState, useEffect } from "react";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { Button, IconButton } from "@mui/material";
 import Grid from "@mui/material/Grid2";
-import { generateClient } from "aws-amplify/data";
-import { Schema } from "../../../../amplify/data/resource";
 import Form from "./Form";
-import Modal from "@/components/Dialog/Dialog";
+import CustomDialog from "@/components/CustomDialog/CustomDialog";
 import DeleteAction from "@/components/ActionsDataGrid/DeleteAction";
 import EditIcon from "@mui/icons-material/Edit";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import AccessibilityIcon from "@mui/icons-material/Accessibility";
 import Loading from "@/components/Loading/Loading";
 import { showAlert } from "@/components/SweetAlert/Alert";
-
-const client = generateClient<Schema>();
+import { client } from "@/helpers/Client";
+import Owners from "./Owners";
+import { CheckErrors } from "@/helpers/CheckErrors";
 
 const Table = () => {
-  const [zone, setZones] = useState<any[]>([]);
+  const [zones, setZones] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [selectedZone, setSelectedZone] = useState<any | null>(null);
+  const [openOwner, setOpenOwner] = useState(false);
+  const [selectedOwner, setSelectedOwner] = useState<any | null>(null);
+
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const sub = client.models.Zone.observeQuery().subscribe({
+      next: ({ items, isSynced }) => {
+        setZones([...items]);
+      },
+    });
+    return () => sub.unsubscribe();
+  }, []);
 
   const fetchZones = async () => {
     setLoading(true);
@@ -64,6 +76,16 @@ const Table = () => {
     setOpen(false);
   };
 
+  const handleOpenOnwer = async (Zone: any) => {
+    const { data: owner } = await Zone.owner();
+    setSelectedOwner(owner);
+    setOpenOwner(true);
+  };
+
+  const handleCloseOnwer = () => {
+    setOpenOwner(false);
+  };
+
   const handleOpen = () => {
     setSelectedZone(null);
     setOpen(true);
@@ -77,10 +99,9 @@ const Table = () => {
   const handleDelete = async (id: string) => {
     setLoading(true);
     try {
-      await client.models.Zone.delete({ id });
+      const deleteData = await client.models.Zone.delete({ id });
 
-      const { data: updatedZones } = await client.models.Zone.list();
-      setZones(updatedZones);
+      await CheckErrors(deleteData);
       setLoading(false);
 
       showAlert({
@@ -88,12 +109,12 @@ const Table = () => {
         message: "La zone se eliminó correctamente.",
         type: "success",
       });
-    } catch (error) {
+    } catch (error: any) {
       setLoading(false);
 
       showAlert({
         title: "¡Error!",
-        message: "Hubo un problema al eliminar la zone.",
+        message: error,
         type: "warning",
       });
     }
@@ -120,6 +141,14 @@ const Table = () => {
           </IconButton>
 
           <DeleteAction id={params.row.id} onDelete={handleDelete} />
+          <IconButton
+            title={"Agregar propietario"}
+            onClick={() => handleOpenOnwer(params.row)}
+            aria-label='Agregar'
+            size='large'
+          >
+            <AccessibilityIcon color='primary' />
+          </IconButton>
         </>
       ),
     },
@@ -130,7 +159,6 @@ const Table = () => {
       {loading && <Loading />}
 
       <Grid container spacing={2} p={3}>
-        {/* Button to trigger the creation modal */}
         <Grid size={12}>
           <Button
             variant='contained'
@@ -139,26 +167,23 @@ const Table = () => {
             sx={{ marginBottom: 2 }}
             startIcon={<AddCircleOutlineIcon />}
           >
-            Crear zone
+            Crear Zona
           </Button>
         </Grid>
 
-        {/* DataGrid with full width */}
         <Grid size={12}>
           <DataGrid
-            rows={zone}
+            rows={zones}
             columns={columns}
             slots={{ toolbar: GridToolbar }}
           />
         </Grid>
 
-        {/* Modal to create or edit Zone */}
-        <Modal
-          title={selectedZone ? "Editar zone" : "Crear zone"}
+        <CustomDialog
+          title={selectedZone ? "Editar zona" : "Crear zona"}
           children={
             <Form
               selectedZone={selectedZone}
-              setZones={setZones}
               handleClose={handleClose}
               setOpen={setOpen}
               open={open}
@@ -166,6 +191,20 @@ const Table = () => {
           }
           setOpen={setOpen}
           open={open}
+        />
+
+        <CustomDialog
+          title={selectedOwner ? "Editar propietario" : "Crear propietario"}
+          children={
+            <Owners
+              selectedOwner={selectedOwner}
+              handleCloseOnwer={handleCloseOnwer}
+              setOpen={setOpenOwner}
+              open={openOwner}
+            />
+          }
+          setOpen={setOpenOwner}
+          open={openOwner}
         />
       </Grid>
     </>
