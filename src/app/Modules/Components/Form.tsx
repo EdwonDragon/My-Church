@@ -8,13 +8,12 @@ import { validateAlphanumeric, validateSelects } from "@/validators";
 import { showAlert } from "@/components/SweetAlert/Alert";
 import Loading from "@/components/Loading/Loading";
 import zones from "../Helpers/zones.json";
-import { client } from "@/helpers/Client";
-import { CheckErrors } from "@/helpers/CheckErrors";
+// import { client } from "@/helpers/Client";
+// import { CheckErrors } from "@/helpers/CheckErrors";
 import ButtonsForm from "@/components/ButtonsForm/ButtonsForm";
 
 interface FormProps {
   selectedModule: Record<string, any> | null;
-  setModules: React.Dispatch<React.SetStateAction<any[]>>;
   handleClose: () => void;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   open: boolean;
@@ -22,7 +21,6 @@ interface FormProps {
 
 const ModuleForm = ({
   selectedModule,
-  setModules,
   handleClose,
   setOpen,
   open,
@@ -33,6 +31,7 @@ const ModuleForm = ({
     register,
     control,
     watch,
+    trigger,
     formState: { errors },
   } = useForm({
     defaultValues: { name: "", route: "", owner: "", zoneId: null },
@@ -42,36 +41,35 @@ const ModuleForm = ({
   const [from, setFrom] = useState<any[]>([]);
 
   const onSubmit = async (data: any) => {
-    delete data.owner;
-
-    setLoading(true);
-    try {
-      let newData;
-      if (selectedModule) {
-        newData = await client.models.Modules.update({
-          id: selectedModule.id,
-          ...data,
-        });
-      } else {
-        newData = await client.models.Modules.create(data);
-      }
-      await CheckErrors(newData);
-      handleClose();
-      setLoading(false);
-      showAlert({
-        title: "¡Éxito!",
-        message: "El módulo se guardó correctamente.",
-        type: "success",
-      });
-    } catch (error: any) {
-      setLoading(false);
-      handleClose();
-      showAlert({
-        title: "¡Error!",
-        message: error,
-        type: "warning",
-      });
-    }
+    // delete data.owner;
+    // setLoading(true);
+    // try {
+    //   let newData;
+    //   if (selectedModule) {
+    //     newData = await client.models.Modules.update({
+    //       id: selectedModule.id,
+    //       ...data,
+    //     });
+    //   } else {
+    //     newData = await client.models.Modules.create(data);
+    //   }
+    //   await CheckErrors(newData);
+    //   handleClose();
+    //   setLoading(false);
+    //   showAlert({
+    //     title: "¡Éxito!",
+    //     message: "El módulo se guardó correctamente.",
+    //     type: "success",
+    //   });
+    // } catch (error: any) {
+    //   setLoading(false);
+    //   handleClose();
+    //   showAlert({
+    //     title: "¡Error!",
+    //     message: error,
+    //     type: "warning",
+    //   });
+    // }
   };
 
   useEffect(() => {
@@ -99,21 +97,21 @@ const ModuleForm = ({
   const fetchFrom = async () => {
     setLoading(true);
 
-    try {
-      const { data } = await client.models.Zone.listZoneByType({
-        type: watch("owner"),
-      });
+    // try {
+    //   const { data } = await client.models.Zone.listZoneByType({
+    //     type: watch("owner"),
+    //   });
 
-      setFrom(data);
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      showAlert({
-        title: "¡Error!",
-        message: "Hubo un problema al cargar las conferencias.",
-        type: "warning",
-      });
-    }
+    //   setFrom(data);
+    //   setLoading(false);
+    // } catch (error) {
+    //   setLoading(false);
+    //   showAlert({
+    //     title: "¡Error!",
+    //     message: "Hubo un problema al cargar las conferencias.",
+    //     type: "warning",
+    //   });
+    // }
   };
 
   useEffect(() => {
@@ -210,9 +208,10 @@ const ModuleForm = ({
         <Grid size={12}>
           <ButtonsForm
             setOpen={setOpen}
+            selected={selectedModule}
+            trigger={trigger}
             handleSubmit={handleSubmit}
             onSubmit={onSubmit}
-            selected={selectedModule}
           />
         </Grid>
       </Grid>

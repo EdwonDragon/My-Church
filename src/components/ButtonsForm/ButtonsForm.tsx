@@ -1,19 +1,40 @@
+import { useAppDispatch } from "@/store/hooks";
+import { setMessage } from "@/store/slices/messageSlice/messageSilce";
 import { Button, DialogActions } from "@mui/material";
 import React from "react";
 
 interface ButtonProps {
   setOpen: (isOpen: boolean) => void;
-  handleSubmit: (callback: () => void) => (event: React.FormEvent) => void;
-  onSubmit: any;
   selected: any;
+  trigger: any;
+  handleSubmit: any;
+  onSubmit: any;
 }
 
 const ButtonsForm: React.FC<ButtonProps> = ({
   setOpen,
+  selected,
+  trigger,
   handleSubmit,
   onSubmit,
-  selected,
 }) => {
+  const dispatch = useAppDispatch();
+
+  const checkErrors = async () => {
+    const isStepValid = await trigger();
+    if (isStepValid) {
+      handleSubmit(onSubmit)();
+    } else {
+      dispatch(
+        setMessage({
+          title: "¡Error!",
+          message: "Revise el formulario, faltan datos",
+          type: "warning",
+        })
+      );
+    }
+  };
+
   return (
     <DialogActions>
       <Button
@@ -25,7 +46,7 @@ const ButtonsForm: React.FC<ButtonProps> = ({
         Cancelar
       </Button>
       <Button
-        onClick={handleSubmit(onSubmit)}
+        onClick={checkErrors}
         variant='contained'
         color='primary'
         aria-label={selected ? "Actualizar registro" : "Crear nuevo registro"}

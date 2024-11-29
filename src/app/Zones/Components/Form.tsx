@@ -5,97 +5,78 @@ import { Controller, useForm } from "react-hook-form";
 import Grid from "@mui/material/Grid2";
 import { Autocomplete, TextField } from "@mui/material";
 import { validateAlphanumeric, validateSelects } from "@/validators";
-import { showAlert } from "@/components/SweetAlert/Alert";
 import Loading from "@/components/Loading/Loading";
 import types from "../Helpers/types.json";
-import { client } from "@/helpers/Client";
-import { CheckErrors } from "@/helpers/CheckErrors";
 import ButtonsForm from "../../../components/ButtonsForm/ButtonsForm";
 import { UploadFile } from "@/components/UploadFile/UploadFile";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { createZone, updateZone } from "@/store/Thunks/ThunksZones/Thunk";
 
 interface FormProps {
-  selectedZone: Record<string, any>;
   handleClose: () => void;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   open: boolean;
 }
 
-const Form = ({ selectedZone, handleClose, setOpen, open }: FormProps) => {
+const Form = ({ handleClose, setOpen, open }: FormProps) => {
   const {
     handleSubmit,
     reset,
     register,
     control,
     setValue,
+    trigger,
+    watch,
     formState: { errors },
   } = useForm({
     defaultValues: { name: "", location: "", logo: [], type: "" },
   });
-
-  const [loading, setLoading] = useState(true);
+  const zones = useAppSelector((state) => state.zones);
+  const dispatch = useAppDispatch();
   const [files, setFiles]: any = useState({});
-
   useEffect(() => {
     const array: any = Object.keys(files).map((key) => key);
     setValue("logo", array);
   }, [files]);
 
   const onSubmit = async (data: any) => {
-    setLoading(true);
-    try {
-      let newData;
-      if (selectedZone) {
-        newData = await client.models.Zone.update({
-          id: selectedZone.id,
-          ...data,
-        });
-      } else {
-        newData = await client.models.Zone.create(data);
-      }
-      await CheckErrors(newData);
-      handleClose();
-      setLoading(false);
-      showAlert({
-        title: "¡Éxito!",
-        message: "Los datos se guardaron correctamente.",
-        type: "success",
-      });
-    } catch (error: any) {
-      setLoading(false);
-      handleClose();
-      showAlert({
-        title: "¡Error!",
-        message: error,
-        type: "warning",
-      });
+    if (zones.selectedZone) {
+      dispatch(updateZone(zones.selectedZone.id, data));
+    } else {
+      dispatch(createZone(data));
     }
+
+    handleClose();
   };
 
   useEffect(() => {
-    setLoading(true);
-    if (selectedZone) {
+    if (zones.selectedZone) {
       reset({
-        location: selectedZone.location,
-        name: selectedZone.name,
-        type: selectedZone.type,
+        location: zones.selectedZone.location,
+        name: zones.selectedZone.name,
+        type: zones.selectedZone.type,
       });
-      if (selectedZone.logo.length > 0) {
+      if (zones.selectedZone.logo.length > 0) {
         setFiles({
-          [selectedZone.logo]: {
+          [zones.selectedZone.logo]: {
             status: "success",
           },
         });
       }
     }
-    setLoading(false);
-  }, [open]);
+  }, [zones.selectedZone]);
 
   return (
     <>
-      {loading && <Loading />}
+      {zones.loading && <Loading />}
       <Grid container spacing={2} padding={2}>
         <Grid size={12}>
           <TextField
+            slotProps={{
+              inputLabel: {
+                shrink: !!watch("name"), // This ensures shrink is a boolean (true or false)
+              },
+            }}
             variant='outlined'
             {...register("name", validateAlphanumeric("Nombre"))}
             label={"Nombre"}
@@ -107,6 +88,11 @@ const Form = ({ selectedZone, handleClose, setOpen, open }: FormProps) => {
 
         <Grid size={12}>
           <TextField
+            slotProps={{
+              inputLabel: {
+                shrink: !!watch("location"), // This ensures shrink is a boolean (true or false)
+              },
+            }}
             variant='outlined'
             {...register("location", validateAlphanumeric("Ubicacion"))}
             label={"Ubicacion"}
@@ -157,9 +143,10 @@ const Form = ({ selectedZone, handleClose, setOpen, open }: FormProps) => {
         <Grid size={12}>
           <ButtonsForm
             setOpen={setOpen}
+            selected={zones.selectedZone}
+            trigger={trigger}
             handleSubmit={handleSubmit}
             onSubmit={onSubmit}
-            selected={selectedZone}
           />
         </Grid>
       </Grid>

@@ -11,8 +11,8 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import Loading from "@/components/Loading/Loading";
 import { showAlert } from "@/components/SweetAlert/Alert";
-import { client } from "@/helpers/Client";
-import { CheckErrors } from "@/helpers/CheckErrors";
+// import { client } from "@/helpers/Client";
+// import { CheckErrors } from "@/helpers/CheckErrors";
 
 const Table = () => {
   const [modules, setModules] = useState<any[]>([]);
@@ -21,63 +21,55 @@ const Table = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const sub = client.models.Modules.observeQuery().subscribe({
-      next: ({ items, isSynced }) => {
-        setModules([...items]);
-      },
-    });
-    return () => sub.unsubscribe();
+    // const sub = client.models.Modules.observeQuery().subscribe({
+    //   next: ({ items, isSynced }) => {
+    //     setModules([...items]);
+    //   },
+    // });
+    // return () => sub.unsubscribe();
   }, []);
 
   const fetchModules = async () => {
-    setLoading(true);
-    try {
-      let allModules: any[] = [];
-      let nextToken: string | null = null;
-
-      do {
-        const rawResponse = await client.models.Modules.list({
-          nextToken,
-        });
-        const response: { data: any[]; nextToken: string | null } = {
-          data: rawResponse.data,
-          nextToken: rawResponse.nextToken || null,
-        };
-
-        await CheckErrors(response);
-
-        allModules = [...allModules, ...response.data];
-        nextToken = response.nextToken;
-      } while (nextToken);
-
-      const enrichedModules = await Promise.all(
-        allModules.map(async (module) => {
-          const enrichedModule: any = { ...module };
-
-          if (module.conference) {
-            const { data: conferenceData } = await module.conference();
-            enrichedModule.conferenceData = conferenceData;
-          }
-
-          if (module.district) {
-            const { data: districtData } = await module.district();
-            enrichedModule.districtData = districtData;
-          }
-
-          return enrichedModule;
-        })
-      );
-
-      setModules(enrichedModules);
-    } catch (error: any) {
-      showAlert({
-        title: "¡Error!",
-        message: error,
-        type: "warning",
-      });
-    } finally {
-      setLoading(false);
-    }
+    // setLoading(true);
+    // try {
+    //   let allModules: any[] = [];
+    //   let nextToken: string | null = null;
+    //   do {
+    //     const rawResponse = await client.models.Modules.list({
+    //       nextToken,
+    //     });
+    //     const response: { data: any[]; nextToken: string | null } = {
+    //       data: rawResponse.data,
+    //       nextToken: rawResponse.nextToken || null,
+    //     };
+    //     // await CheckErrors(response);
+    //     allModules = [...allModules, ...response.data];
+    //     nextToken = response.nextToken;
+    //   } while (nextToken);
+    //   const enrichedModules = await Promise.all(
+    //     allModules.map(async (module) => {
+    //       const enrichedModule: any = { ...module };
+    //       if (module.conference) {
+    //         const { data: conferenceData } = await module.conference();
+    //         enrichedModule.conferenceData = conferenceData;
+    //       }
+    //       if (module.district) {
+    //         const { data: districtData } = await module.district();
+    //         enrichedModule.districtData = districtData;
+    //       }
+    //       return enrichedModule;
+    //     })
+    //   );
+    //   setModules(enrichedModules);
+    // } catch (error: any) {
+    //   showAlert({
+    //     title: "¡Error!",
+    //     message: error,
+    //     type: "warning",
+    //   });
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
   useEffect(() => {
@@ -100,27 +92,24 @@ const Table = () => {
   };
 
   const handleDelete = async (id: string) => {
-    setLoading(true);
-    try {
-      const deleteData = await client.models.Modules.delete({ id });
-      await CheckErrors(deleteData);
-
-      setLoading(false);
-
-      showAlert({
-        title: "¡Éxito!",
-        message: "El módulo se eliminó correctamente.",
-        type: "success",
-      });
-    } catch (error: any) {
-      setLoading(false);
-
-      showAlert({
-        title: "¡Error!",
-        message: error,
-        type: "warning",
-      });
-    }
+    // setLoading(true);
+    // try {
+    //   const deleteData = await client.models.Modules.delete({ id });
+    //   // await CheckErrors(deleteData);
+    //   setLoading(false);
+    //   showAlert({
+    //     title: "¡Éxito!",
+    //     message: "El módulo se eliminó correctamente.",
+    //     type: "success",
+    //   });
+    // } catch (error: any) {
+    //   setLoading(false);
+    //   showAlert({
+    //     title: "¡Error!",
+    //     message: error,
+    //     type: "warning",
+    //   });
+    // }
   };
 
   const columns = [
@@ -180,7 +169,6 @@ const Table = () => {
           children={
             <Form
               selectedModule={selectedModule}
-              setModules={setModules}
               handleClose={handleClose}
               setOpen={setOpen}
               open={open}

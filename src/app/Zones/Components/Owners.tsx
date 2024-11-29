@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Loading from "@/components/Loading/Loading";
 import Grid from "@mui/material/Grid2";
 import { TextField } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { validateAlphanumeric } from "@/validators";
 import ButtonsForm from "@/components/ButtonsForm/ButtonsForm";
+import { showAlert } from "@/components/SweetAlert/Alert";
 interface FormProps {
   selectedOwner: Record<string, any>;
   handleCloseOnwer: () => void;
@@ -25,7 +26,6 @@ const Owners = ({
     formState: { errors },
   } = useForm({
     defaultValues: {
-      logo: "",
       username: "",
       email: "",
       role: "",
@@ -34,23 +34,25 @@ const Owners = ({
     },
   });
 
-  const onSubmit = (data: any) => {};
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      showAlert({
+        title: "¡Error!",
+        message: "Revise el formulario, faltan datos",
+        type: "warning",
+      });
+    }
+  }, [errors]);
+
+  const onSubmit = (data: any) => {
+    console.log(data);
+  };
   return (
     <>
       {loading && <Loading />}
 
       <Grid container spacing={2}>
-        <Grid size={12}>
-          <TextField
-            variant='outlined'
-            {...register("logo", validateAlphanumeric("Logo"))}
-            label='Logo'
-            fullWidth
-            helperText={errors.logo?.message}
-            error={!!errors.logo}
-          />
-        </Grid>
-        <Grid size={12}>
+        <Grid size={6}>
           <TextField
             variant='outlined'
             {...register("username", validateAlphanumeric("Usuario"))}
@@ -60,7 +62,7 @@ const Owners = ({
             error={!!errors.username}
           />
         </Grid>
-        <Grid size={12}>
+        <Grid size={6}>
           <TextField
             variant='outlined'
             {...register("email", {
@@ -74,7 +76,7 @@ const Owners = ({
             error={!!errors.email}
           />
         </Grid>
-        <Grid size={12}>
+        <Grid size={6}>
           <TextField
             variant='outlined'
             {...register("role", validateAlphanumeric("Rol"))}
@@ -84,7 +86,7 @@ const Owners = ({
             error={!!errors.role}
           />
         </Grid>
-        <Grid size={12}>
+        <Grid size={6}>
           <TextField
             variant='outlined'
             {...register("rfc", validateAlphanumeric("RFC"))}
@@ -94,7 +96,7 @@ const Owners = ({
             error={!!errors.rfc}
           />
         </Grid>
-        <Grid size={12}>
+        <Grid size={6}>
           <TextField
             variant='outlined'
             {...register("curp", validateAlphanumeric("CURP"))}
@@ -104,7 +106,7 @@ const Owners = ({
             error={!!errors.curp}
           />
         </Grid>
-        <Grid size={12}>
+        <Grid size={6}>
           <ButtonsForm
             setOpen={setOpen}
             handleSubmit={handleSubmit}

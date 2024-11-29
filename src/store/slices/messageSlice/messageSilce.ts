@@ -1,17 +1,19 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { SweetAlertIcon } from "sweetalert2";
 
 
 interface Message {
+    title?: string;
     message?: string;
-    type?: string;
+    type?: SweetAlertIcon;
 }
 
 const initialState: Message = {
+    title: "",
     message: "",
     type: "info",
 };
 
-// Creación de slice
 const messageSlice = createSlice({
     name: "message",
     initialState,
@@ -20,14 +22,17 @@ const messageSlice = createSlice({
         setMessage(state, action: PayloadAction<Message>) {
             state.message = action.payload.message;
             state.type = action.payload.type;
+            state.title = action.payload.title;
         },
-
+        clearMessage() {
+            return initialState;
+        },
 
     },
 });
 
-// Exportación de acciones
-export const { setMessage } = messageSlice.actions;
 
-// Exportación del reducer
+export const { setMessage, clearMessage } = messageSlice.actions;
+
+
 export default messageSlice.reducer;

@@ -11,65 +11,27 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import AccessibilityIcon from "@mui/icons-material/Accessibility";
 import Loading from "@/components/Loading/Loading";
-import { showAlert } from "@/components/SweetAlert/Alert";
-import { client } from "@/helpers/Client";
 import Owners from "./Owners";
-import { CheckErrors } from "@/helpers/CheckErrors";
+import {
+  deleteZone,
+  fetchZoneById,
+  fetchZones,
+  subscribeToZoneUpdates,
+} from "@/store/Thunks/ThunksZones/Thunk";
+
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { cleanSelectedZone } from "@/store/slices/zonesSlice/zonesSlice";
 
 const Table = () => {
-  const [zones, setZones] = useState<any[]>([]);
+  const zones = useAppSelector((state) => state.zones);
   const [open, setOpen] = useState(false);
-  const [selectedZone, setSelectedZone] = useState<any | null>(null);
   const [openOwner, setOpenOwner] = useState(false);
   const [selectedOwner, setSelectedOwner] = useState<any | null>(null);
-
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const sub = client.models.Zone.observeQuery().subscribe({
-      next: ({ items, isSynced }) => {
-        setZones([...items]);
-      },
-    });
-    return () => sub.unsubscribe();
-  }, []);
-
-  const fetchZones = async () => {
-    setLoading(true);
-    try {
-      let allZones: any[] = [];
-      let nextToken: string | null = null;
-
-      do {
-        const rawResponse = await client.models.Zone.list({
-          nextToken,
-        });
-
-        const response: { data: any[]; nextToken: string | null } = {
-          data: rawResponse.data,
-          nextToken: rawResponse.nextToken || null, // Convertimos undefined a null
-        };
-
-        allZones = [...allZones, ...response.data];
-        nextToken = response.nextToken;
-      } while (nextToken); // Continúa mientras haya un nextToken
-
-      setZones(allZones);
-    } catch (error) {
-      setLoading(false);
-      showAlert({
-        title: "¡Error!",
-        message: "Hubo un problema al cargar las zones.",
-        type: "warning",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
-    setLoading(true);
-    fetchZones();
+    dispatch(subscribeToZoneUpdates());
+    dispatch(fetchZones());
   }, []);
 
   const handleClose = () => {
@@ -87,44 +49,23 @@ const Table = () => {
   };
 
   const handleOpen = () => {
-    setSelectedZone(null);
+    dispatch(cleanSelectedZone());
     setOpen(true);
   };
 
   const handleEdit = (Zone: any) => {
-    setSelectedZone(Zone);
+    dispatch(fetchZoneById(Zone.id));
     setOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    setLoading(true);
-    try {
-      const deleteData = await client.models.Zone.delete({ id });
-
-      await CheckErrors(deleteData);
-      setLoading(false);
-
-      showAlert({
-        title: "¡Éxito!",
-        message: "La zone se eliminó correctamente.",
-        type: "success",
-      });
-    } catch (error: any) {
-      setLoading(false);
-
-      showAlert({
-        title: "¡Error!",
-        message: error,
-        type: "warning",
-      });
-    }
+  const handleDelete = (id: any) => {
+    dispatch(deleteZone(id));
   };
-
   const columns = [
     { field: "name", headerName: "Nombre", flex: 1 },
     { field: "location", headerName: "Ubicación", flex: 1 },
 
-    // { field: "logo", headerName: "logo", flex: 1 },
+    { field: "logo", headerName: "logo", flex: 1 },
     {
       field: "actions",
       headerName: "Acciones",
@@ -156,7 +97,7 @@ const Table = () => {
 
   return (
     <>
-      {loading && <Loading />}
+      {zones.loading && <Loading />}
 
       <Grid container spacing={2} p={3}>
         <Grid size={12}>
@@ -173,21 +114,16 @@ const Table = () => {
 
         <Grid size={12}>
           <DataGrid
-            rows={zones}
+            rows={zones.zones}
             columns={columns}
             slots={{ toolbar: GridToolbar }}
           />
         </Grid>
 
         <CustomDialog
-          title={selectedZone ? "Editar zona" : "Crear zona"}
+          title={zones.selectedZone ? "Editar zona" : "Crear zona"}
           children={
-            <Form
-              selectedZone={selectedZone}
-              handleClose={handleClose}
-              setOpen={setOpen}
-              open={open}
-            />
+            <Form handleClose={handleClose} setOpen={setOpen} open={open} />
           }
           setOpen={setOpen}
           open={open}
