@@ -62,9 +62,9 @@ const schema = a.schema({
   Modules: a.model({
     name: a.string().required(),
     route: a.string().required(),
-    roleUser: a.string().array(),
+    rolesUser: a.string().array(),
     zoneId: a.id(),
-    zone: a.belongsTo('Zone', 'zoneId'), // Corrected reference from 'Conference' to 'Zone'
+    zone: a.belongsTo('Zone', 'zoneId'),
   }).authorization(allow => [
     allow.groups(["SUPERADMIND"]).to(["read", "update", "create", "delete"]),
   ]),

@@ -1,30 +1,28 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import Grid from "@mui/material/Grid2";
-import { Autocomplete, Button, DialogActions, TextField } from "@mui/material";
+import { Autocomplete, TextField } from "@mui/material";
 import { validateAlphanumeric, validateSelects } from "@/validators";
-import { showAlert } from "@/components/SweetAlert/Alert";
 import Loading from "@/components/Loading/Loading";
-import zones from "../Helpers/zones.json";
-// import { client } from "@/helpers/Client";
-// import { CheckErrors } from "@/helpers/CheckErrors";
+import zones from "@/Jsons/zones.json";
+import roles from "@/Jsons/roles.json";
 import ButtonsForm from "@/components/ButtonsForm/ButtonsForm";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchZoneByType } from "@/store/thunks/thunkZones/thunkZones";
+import {
+  createModule,
+  updateModule,
+} from "@/store/thunks/thunkModules/thunkModules";
+import { setLoading } from "@/store/slices/modulesSlice/modulesSlice";
 
 interface FormProps {
-  selectedModule: Record<string, any> | null;
   handleClose: () => void;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  open: boolean;
 }
 
-const ModuleForm = ({
-  selectedModule,
-  handleClose,
-  setOpen,
-  open,
-}: FormProps) => {
+const ModuleForm = ({ handleClose, setOpen }: FormProps) => {
   const {
     handleSubmit,
     reset,
@@ -34,84 +32,50 @@ const ModuleForm = ({
     trigger,
     formState: { errors },
   } = useForm({
-    defaultValues: { name: "", route: "", owner: "", zoneId: null },
+    defaultValues: {
+      name: "",
+      route: "",
+      owner: "",
+      zoneId: null,
+      rolesUser: [],
+    },
   });
 
-  const [loading, setLoading] = useState(false);
-  const [from, setFrom] = useState<any[]>([]);
+  const { selectedZone } = useAppSelector((state) => state.zones);
+  const modules = useAppSelector((state) => state.modules);
+  const dispatch = useAppDispatch();
 
   const onSubmit = async (data: any) => {
-    // delete data.owner;
-    // setLoading(true);
-    // try {
-    //   let newData;
-    //   if (selectedModule) {
-    //     newData = await client.models.Modules.update({
-    //       id: selectedModule.id,
-    //       ...data,
-    //     });
-    //   } else {
-    //     newData = await client.models.Modules.create(data);
-    //   }
-    //   await CheckErrors(newData);
-    //   handleClose();
-    //   setLoading(false);
-    //   showAlert({
-    //     title: "¡Éxito!",
-    //     message: "El módulo se guardó correctamente.",
-    //     type: "success",
-    //   });
-    // } catch (error: any) {
-    //   setLoading(false);
-    //   handleClose();
-    //   showAlert({
-    //     title: "¡Error!",
-    //     message: error,
-    //     type: "warning",
-    //   });
-    // }
+    delete data.owner;
+
+    if (modules.selectedModule) {
+      dispatch(updateModule(modules.selectedModule.id, data));
+    } else {
+      dispatch(createModule(data));
+    }
+    handleClose();
   };
 
-  useEffect(() => {
-    if (open && selectedModule) {
+  const getInfo = async () => {
+    dispatch(setLoading(true));
+    if (modules.selectedModule) {
+      const { data } = await modules.selectedModule.zone();
       reset({
-        name: selectedModule.name,
-        route: selectedModule.route,
-        zoneId: selectedModule.zoneId,
-        owner: selectedModule.conferenceData
-          ? "Conference"
-          : selectedModule.districtData
-          ? "District"
-          : "Church",
-      });
-    } else {
-      reset({
-        name: "",
-        route: "",
-        zoneId: null,
-        owner: "",
+        name: modules.selectedModule.name,
+        route: modules.selectedModule.route,
+        zoneId: modules.selectedModule.zoneId,
+        rolesUser: modules.selectedModule.rolesUser,
+        owner: data.type,
       });
     }
-  }, [open, selectedModule, reset]);
+    dispatch(setLoading(false));
+  };
+  useEffect(() => {
+    getInfo();
+  }, [modules.selectedModule]);
 
   const fetchFrom = async () => {
-    setLoading(true);
-
-    // try {
-    //   const { data } = await client.models.Zone.listZoneByType({
-    //     type: watch("owner"),
-    //   });
-
-    //   setFrom(data);
-    //   setLoading(false);
-    // } catch (error) {
-    //   setLoading(false);
-    //   showAlert({
-    //     title: "¡Error!",
-    //     message: "Hubo un problema al cargar las conferencias.",
-    //     type: "warning",
-    //   });
-    // }
+    dispatch(fetchZoneByType(watch("owner")));
   };
 
   useEffect(() => {
@@ -122,11 +86,16 @@ const ModuleForm = ({
 
   return (
     <>
-      {loading && <Loading />}
+      {modules.loading && <Loading />}
 
       <Grid container spacing={2} padding={2}>
         <Grid size={12}>
           <TextField
+            slotProps={{
+              inputLabel: {
+                shrink: !!watch("name"), // This ensures shrink is a boolean (true or false)
+              },
+            }}
             variant='outlined'
             {...register("name", validateAlphanumeric("Nombre del módulo"))}
             label='Nombre del módulo'
@@ -138,6 +107,11 @@ const ModuleForm = ({
 
         <Grid size={12}>
           <TextField
+            slotProps={{
+              inputLabel: {
+                shrink: !!watch("route"), // This ensures shrink is a boolean (true or false)
+              },
+            }}
             variant='outlined'
             {...register("route", validateAlphanumeric("Ruta del módulo"))}
             label='Ruta del módulo'
@@ -175,8 +149,39 @@ const ModuleForm = ({
             )}
           />
         </Grid>
-        {from.length <= 0 && `No hay registros de ${watch("owner")} `}
-        {watch("owner") && from.length > 0 && (
+
+        <Grid size={12}>
+          <Controller
+            name='rolesUser'
+            control={control}
+            rules={validateSelects("rolesUser", false)}
+            render={({ field }) => (
+              <Autocomplete
+                multiple
+                options={roles}
+                getOptionLabel={(option) => option.name}
+                value={roles.filter((option) =>
+                  (field.value as string[]).includes(option.value)
+                )}
+                onChange={(_, value) =>
+                  field.onChange(value.map((option) => option.value))
+                }
+                fullWidth
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    helperText={errors.rolesUser?.message}
+                    label='Roles'
+                    error={!!errors.rolesUser}
+                  />
+                )}
+              />
+            )}
+          />
+        </Grid>
+
+        {selectedZone && `No hay registros de ${watch("owner")} `}
+        {watch("owner") && selectedZone && (
           <Grid size={12}>
             <Controller
               name='zoneId'
@@ -185,9 +190,11 @@ const ModuleForm = ({
               render={({ field }) => (
                 <Autocomplete
                   value={
-                    from.find((option) => option.id === field.value) || null
+                    selectedZone.find(
+                      (option: any) => option.id === field.value
+                    ) || null
                   }
-                  options={from}
+                  options={selectedZone}
                   getOptionLabel={(option) => option.name}
                   onChange={(_, value) => field.onChange(value ? value.id : "")}
                   fullWidth
@@ -208,7 +215,7 @@ const ModuleForm = ({
         <Grid size={12}>
           <ButtonsForm
             setOpen={setOpen}
-            selected={selectedModule}
+            selected={modules.selectedModule}
             trigger={trigger}
             handleSubmit={handleSubmit}
             onSubmit={onSubmit}

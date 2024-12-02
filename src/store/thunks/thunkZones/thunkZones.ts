@@ -22,7 +22,7 @@ interface ZonesState {
 
 export const subscribeToZoneUpdates = () => (dispatch: AppDispatch) => {
     const sub = client.models.Zone.observeQuery().subscribe({
-        next: ({ items, isSynced }) => {
+        next: ({ items }) => {
 
             dispatch(setZones([...items]));
         },
@@ -77,6 +77,26 @@ export const fetchZones = () => async (dispatch: AppDispatch) => {
 };
 
 
+
+export const fetchZoneByType = (type: string) => async (dispatch: AppDispatch) => {
+    dispatch(setLoading(true));
+    try {
+        const { data } = await client.models.Zone.listZoneByType({
+            type
+        });
+        dispatch(setSelectedZone(data.length > 0 ? data : null));
+    } catch (error: any) {
+        dispatch(
+            setMessage({
+                title: "¡Error!",
+                message: error,
+                type: "warning",
+            })
+        );
+    } finally {
+        dispatch(setLoading(false));
+    }
+};
 export const fetchZoneById = (id: string) => async (dispatch: AppDispatch) => {
     dispatch(setLoading(true));
     try {
@@ -110,6 +130,13 @@ export const createZone = (data: Omit<Zone, "id">) => async (dispatch: AppDispat
         );
     } finally {
         dispatch(setLoading(false));
+        dispatch(
+            setMessage({
+                title: "¡Éxito!",
+                message: "La zona se creo correctamente.",
+                type: "success",
+            })
+        );
     }
 };
 
@@ -128,6 +155,13 @@ export const updateZone = (id: string, data: Partial<Zone>) => async (dispatch: 
         );
     } finally {
         dispatch(setLoading(false));
+        dispatch(
+            setMessage({
+                title: "¡Éxito!",
+                message: "La zona se actualizo correctamente.",
+                type: "success",
+            })
+        );
     }
 };
 
@@ -147,5 +181,12 @@ export const deleteZone = (id: string) => async (dispatch: AppDispatch) => {
         );
     } finally {
         dispatch(setLoading(false));
+        dispatch(
+            setMessage({
+                title: "¡Éxito!",
+                message: "La zona se elimino correctamente.",
+                type: "success",
+            })
+        );
     }
 };

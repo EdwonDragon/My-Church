@@ -190,6 +190,19 @@ const theme = createTheme({
         },
       },
     },
+    MuiAutocomplete: {
+      styleOverrides: {
+        tag: {
+          backgroundColor: "#008e76",
+          color: "#fff",
+        },
+        root: {
+          "& .MuiSvgIcon-root": {
+            color: "#fff",
+          },
+        },
+      },
+    },
   },
 });
 

@@ -6,19 +6,18 @@ import Grid from "@mui/material/Grid2";
 import { Autocomplete, TextField } from "@mui/material";
 import { validateAlphanumeric, validateSelects } from "@/validators";
 import Loading from "@/components/Loading/Loading";
-import types from "../Helpers/types.json";
+import types from "@/Jsons/zones.json";
 import ButtonsForm from "../../../components/ButtonsForm/ButtonsForm";
 import { UploadFile } from "@/components/UploadFile/UploadFile";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { createZone, updateZone } from "@/store/Thunks/ThunksZones/Thunk";
+import { createZone, updateZone } from "@/store/thunks/thunkZones/thunkZones";
 
 interface FormProps {
   handleClose: () => void;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  open: boolean;
 }
 
-const Form = ({ handleClose, setOpen, open }: FormProps) => {
+const Form = ({ handleClose, setOpen }: FormProps) => {
   const {
     handleSubmit,
     reset,
@@ -45,7 +44,6 @@ const Form = ({ handleClose, setOpen, open }: FormProps) => {
     } else {
       dispatch(createZone(data));
     }
-
     handleClose();
   };
 
@@ -56,7 +54,7 @@ const Form = ({ handleClose, setOpen, open }: FormProps) => {
         name: zones.selectedZone.name,
         type: zones.selectedZone.type,
       });
-      if (zones.selectedZone.logo.length > 0) {
+      if (zones.selectedZone.logo) {
         setFiles({
           [zones.selectedZone.logo]: {
             status: "success",

@@ -11,16 +11,17 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import AccessibilityIcon from "@mui/icons-material/Accessibility";
 import Loading from "@/components/Loading/Loading";
-import Owners from "./Owners";
+
 import {
   deleteZone,
   fetchZoneById,
   fetchZones,
   subscribeToZoneUpdates,
-} from "@/store/Thunks/ThunksZones/Thunk";
+} from "@/store/thunks/thunkZones/thunkZones";
 
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { cleanSelectedZone } from "@/store/slices/zonesSlice/zonesSlice";
+import { StorageImage } from "@aws-amplify/ui-react-storage";
 
 const Table = () => {
   const zones = useAppSelector((state) => state.zones);
@@ -34,10 +35,6 @@ const Table = () => {
     dispatch(fetchZones());
   }, []);
 
-  const handleClose = () => {
-    setOpen(false);
-  };
-
   const handleOpenOnwer = async (Zone: any) => {
     const { data: owner } = await Zone.owner();
     setSelectedOwner(owner);
@@ -47,9 +44,11 @@ const Table = () => {
   const handleCloseOnwer = () => {
     setOpenOwner(false);
   };
-
-  const handleOpen = () => {
+  const handleClose = () => {
     dispatch(cleanSelectedZone());
+    setOpen(false);
+  };
+  const handleOpen = () => {
     setOpen(true);
   };
 
@@ -65,7 +64,22 @@ const Table = () => {
     { field: "name", headerName: "Nombre", flex: 1 },
     { field: "location", headerName: "Ubicación", flex: 1 },
 
-    { field: "logo", headerName: "logo", flex: 1 },
+    {
+      field: "logo",
+      headerName: "Logo",
+      flex: 1,
+
+      renderCell: (params: any) => (
+        <>
+          <StorageImage
+            width={50}
+            height={50}
+            alt='logo'
+            path={`${params.value[0]}`}
+          />
+        </>
+      ),
+    },
     {
       field: "actions",
       headerName: "Acciones",
@@ -122,14 +136,12 @@ const Table = () => {
 
         <CustomDialog
           title={zones.selectedZone ? "Editar zona" : "Crear zona"}
-          children={
-            <Form handleClose={handleClose} setOpen={setOpen} open={open} />
-          }
-          setOpen={setOpen}
+          children={<Form handleClose={handleClose} setOpen={setOpen} />}
+          handleClose={handleClose}
           open={open}
         />
 
-        <CustomDialog
+        {/* <CustomDialog
           title={selectedOwner ? "Editar propietario" : "Crear propietario"}
           children={
             <Owners
@@ -139,9 +151,9 @@ const Table = () => {
               open={openOwner}
             />
           }
-          setOpen={setOpenOwner}
+          handleClose={handleCloseOnwer}
           open={openOwner}
-        />
+        /> */}
       </Grid>
     </>
   );

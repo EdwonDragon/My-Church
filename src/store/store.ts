@@ -3,13 +3,15 @@ import { configureStore } from "@reduxjs/toolkit";
 import authSlice from './slices/authSlice/authSlice';
 import messageSlice from './slices/messageSlice/messageSilce';
 import zonesSlice from './slices/zonesSlice/zonesSlice';
+import modulesSlice from './slices/modulesSlice/modulesSlice';
 
 
 const store = configureStore({
     reducer: {
         user: authSlice,
         message: messageSlice,
-        zones: zonesSlice
+        zones: zonesSlice,
+        modules: modulesSlice
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({

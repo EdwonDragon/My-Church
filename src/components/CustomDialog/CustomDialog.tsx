@@ -4,18 +4,18 @@ import React from "react";
 interface CustomDialogProps {
   title: string;
   children: React.ReactNode;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   open: boolean;
+  handleClose: any;
 }
 
 const CustomDialog: React.FC<CustomDialogProps> = ({
   title,
   children,
-  setOpen,
   open,
+  handleClose,
 }) => {
   return (
-    <Dialog maxWidth='lg' open={open} onClose={() => setOpen(false)}>
+    <Dialog maxWidth='lg' open={open} onClose={handleClose}>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>{children}</DialogContent>
     </Dialog>

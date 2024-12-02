@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Super admind",
+    "value": "SUPERADMIND"
+  },
+  {
+    "name": "Propietario de zona",
+    "value": "OWNER"
+  },
+  {
+    "name": "Líder de zona",
+    "value": "LEADER"
+  }
+]
