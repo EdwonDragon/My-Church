@@ -1,4 +1,6 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
+import { createUser } from "../auth/create-user/resource";
+import { addUserToGroup } from "../auth/add-user-to-group/resource";
 
 const schema = a.schema({
 
@@ -18,7 +20,7 @@ const schema = a.schema({
   })
     .secondaryIndexes((index) => [index("type")])
     .authorization(allow => [
-      allow.groups(["SUPERADMIND"]).to(["read", "update", "create", "delete"]),
+      allow.groups(["SUPERADMIND", "OWNER"]).to(["read", "update", "create", "delete"]),
     ]),
 
   Department: a.model({
@@ -28,7 +30,7 @@ const schema = a.schema({
     zoneId: a.id(),
     zone: a.belongsTo('Zone', 'zoneId'), // Corrected reference from 'Conference' to 'Zone'
   }).authorization(allow => [
-    allow.groups(["SUPERADMIND"]).to(["read", "update", "create", "delete"]),
+    allow.groups(["SUPERADMIND", "OWNER"]).to(["read", "update", "create", "delete"]),
   ]),
 
   Position: a.model({
@@ -39,13 +41,14 @@ const schema = a.schema({
     department: a.belongsTo('Department', 'departmentId'),
     users: a.hasOne('Users', 'positionId'),
   }).authorization(allow => [
-    allow.groups(["SUPERADMIND"]).to(["read", "update", "create", "delete"]),
+    allow.groups(["SUPERADMIND", "OWNER"]).to(["read", "update", "create", "delete"]),
   ]),
 
   Users: a.model({
     username: a.string().required(),
     email: a.string().required(),
     role: a.string().required(),
+    password: a.string().required(),
     positionId: a.id(),
     position: a.belongsTo('Position', 'positionId'),
     rfc: a.string(),
@@ -56,7 +59,7 @@ const schema = a.schema({
   })
     .secondaryIndexes((index) => [index("role")])
     .authorization(allow => [
-      allow.groups(["SUPERADMIND"]).to(["read", "update", "create", "delete"]),
+      allow.groups(["SUPERADMIND", "OWNER"]).to(["read", "update", "create", "delete"]),
     ]),
 
   Modules: a.model({
@@ -66,8 +69,28 @@ const schema = a.schema({
     zoneId: a.id(),
     zone: a.belongsTo('Zone', 'zoneId'),
   }).authorization(allow => [
-    allow.groups(["SUPERADMIND"]).to(["read", "update", "create", "delete"]),
+    allow.groups(["SUPERADMIND", "OWNER"]).to(["read", "update", "create", "delete"]),
   ]),
+
+  createUser: a
+    .mutation()
+    .arguments({
+      userName: a.string().required(),
+      TemporaryPassword: a.string().required(),
+    })
+    .authorization((allow) => [allow.groups(["SUPERADMIND", "OWNER", "LEADER"])])
+    .handler(a.handler.function(createUser))
+    .returns(a.json()),
+
+  addUserToGroup: a
+    .mutation()
+    .arguments({
+      userId: a.string().required(),
+      groupName: a.string().required(),
+    })
+    .authorization((allow) => [allow.groups(["SUPERADMIND", "OWNER", "LEADER"])])
+    .handler(a.handler.function(addUserToGroup))
+    .returns(a.json())
 
 });
 

@@ -7,7 +7,6 @@ import Grid from "@mui/material/Grid2";
 import Form from "./Form";
 import CustomDialog from "@/components/CustomDialog/CustomDialog";
 import DeleteAction from "@/components/ActionsDataGrid/DeleteAction";
-import EditIcon from "@mui/icons-material/Edit";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import AccessibilityIcon from "@mui/icons-material/Accessibility";
 import Loading from "@/components/Loading/Loading";
@@ -22,12 +21,17 @@ import {
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { cleanSelectedZone } from "@/store/slices/zonesSlice/zonesSlice";
 import { StorageImage } from "@aws-amplify/ui-react-storage";
+import Owners from "./Owners";
+import EditAction from "@/components/ActionsDataGrid/EditAction";
+import { fetchUserById } from "@/store/thunks/thunkUsers/thunkUsers";
+import { cleanSelectedUser } from "@/store/slices/usersSilce/usersSlice";
 
 const Table = () => {
   const zones = useAppSelector((state) => state.zones);
+  const owner = useAppSelector((state) => state.users);
   const [open, setOpen] = useState(false);
   const [openOwner, setOpenOwner] = useState(false);
-  const [selectedOwner, setSelectedOwner] = useState<any | null>(null);
+
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -37,11 +41,13 @@ const Table = () => {
 
   const handleOpenOnwer = async (Zone: any) => {
     const { data: owner } = await Zone.owner();
-    setSelectedOwner(owner);
+    dispatch(fetchZoneById(Zone.id));
+    dispatch(fetchUserById(owner?.id));
     setOpenOwner(true);
   };
 
   const handleCloseOnwer = () => {
+    dispatch(cleanSelectedUser());
     setOpenOwner(false);
   };
   const handleClose = () => {
@@ -52,8 +58,8 @@ const Table = () => {
     setOpen(true);
   };
 
-  const handleEdit = (Zone: any) => {
-    dispatch(fetchZoneById(Zone.id));
+  const handleEdit = (id: string) => {
+    dispatch(fetchZoneById(id));
     setOpen(true);
   };
 
@@ -86,16 +92,8 @@ const Table = () => {
       flex: 1,
       renderCell: (params: any) => (
         <>
-          <IconButton
-            title={"Editar zone"}
-            onClick={() => handleEdit(params.row)}
-            aria-label='Editar'
-            size='large'
-          >
-            <EditIcon color='primary' />
-          </IconButton>
-
-          <DeleteAction id={params.row.id} onDelete={handleDelete} />
+          <EditAction handleEdit={handleEdit} id={params.row.id} />
+          <DeleteAction onDelete={handleDelete} id={params.row.id} />
           <IconButton
             title={"Agregar propietario"}
             onClick={() => handleOpenOnwer(params.row)}
@@ -141,19 +139,16 @@ const Table = () => {
           open={open}
         />
 
-        {/* <CustomDialog
-          title={selectedOwner ? "Editar propietario" : "Crear propietario"}
+        <CustomDialog
+          title={
+            owner.selectedUser ? "Editar propietario" : "Crear propietario"
+          }
           children={
-            <Owners
-              selectedOwner={selectedOwner}
-              handleCloseOnwer={handleCloseOnwer}
-              setOpen={setOpenOwner}
-              open={openOwner}
-            />
+            <Owners handleClose={handleCloseOnwer} setOpen={setOpenOwner} />
           }
           handleClose={handleCloseOnwer}
           open={openOwner}
-        /> */}
+        />
       </Grid>
     </>
   );

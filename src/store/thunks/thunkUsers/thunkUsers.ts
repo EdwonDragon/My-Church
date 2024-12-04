@@ -3,23 +3,16 @@ import { AppDispatch } from "../../store";
 import { client } from "../../helpers/Client";
 import { CheckErrors } from "../../helpers/CheckErrors";
 import { setMessage } from "@/store/slices/messageSlice/messageSilce";
-import { setLoading, setModules, setSelectedModule } from "@/store/slices/modulesSlice/modulesSlice";
+import { setLoading, setSelectedUser, setUsers } from "@/store/slices/usersSilce/usersSlice";
+import { userSignUp } from "@/helpers/signUp";
 
 
-export interface Module {
-    id: string;
-    name: string;
-    route: string;
-    rolesUser: (string | null)[] | null;
-    zoneId: string | null;
-}
 
-
-export const subscribeToModulesUpdates = () => (dispatch: AppDispatch) => {
-    const sub = client.models.Modules.observeQuery().subscribe({
+export const subscribeToUsersUpdates = () => (dispatch: AppDispatch) => {
+    const sub = client.models.Users.observeQuery().subscribe({
         next: ({ items }) => {
 
-            dispatch(setModules([...items]));
+            dispatch(setUsers([...items]));
         },
         error: (err) => {
 
@@ -36,28 +29,28 @@ export const subscribeToModulesUpdates = () => (dispatch: AppDispatch) => {
 };
 
 
-export const fetchModules = () => async (dispatch: AppDispatch) => {
+export const fetchUsers = () => async (dispatch: AppDispatch) => {
     dispatch(setLoading(true));
     try {
-        let allModules: Module[] = [];
+        let allUsers: any[] = [];
         let nextToken: string | null = null;
 
         do {
-            const rawResponse = await client.models.Modules.list({ nextToken });
+            const rawResponse = await client.models.Users.list({ nextToken });
             if (!rawResponse || !rawResponse.data) {
                 throw new Error("No se recibió una respuesta válida");
             }
 
-            const response: { data: Module[]; nextToken: string | null } = {
+            const response: any = {
                 data: rawResponse.data,
                 nextToken: rawResponse.nextToken || null,
             };
 
-            allModules = [...allModules, ...response.data];
+            allUsers = [...allUsers, ...response.data];
             nextToken = response.nextToken;
         } while (nextToken);
 
-        dispatch(setModules(allModules));
+        dispatch(setUsers(allUsers));
         dispatch(setLoading(false));
     } catch (error: any) {
         dispatch(
@@ -71,11 +64,11 @@ export const fetchModules = () => async (dispatch: AppDispatch) => {
 };
 
 
-export const fetchModulesById = (id: string) => async (dispatch: AppDispatch) => {
+export const fetchUserById = (id: string) => async (dispatch: AppDispatch) => {
     dispatch(setLoading(true));
     try {
-        const { data } = await client.models.Modules.get({ id });
-        dispatch(setSelectedModule(data));
+        const { data } = await client.models.Users.get({ id });
+        dispatch(setSelectedUser(data));
         dispatch(setLoading(false));
     } catch (error: any) {
         dispatch(
@@ -88,18 +81,42 @@ export const fetchModulesById = (id: string) => async (dispatch: AppDispatch) =>
     }
 };
 
-export const createModule = (data: Omit<Module, "id">) => async (dispatch: AppDispatch) => {
-
+export const createUser = (data: any) => async (dispatch: AppDispatch) => {
     dispatch(setLoading(true));
     try {
-        const newModule = await client.models.Modules.create(data);
-
-        await CheckErrors(newModule);
+        await userSignUp(data.email, data.password, data.role);
+        const newData = await client.models.Users.create(data);
+        await CheckErrors(newData);
         dispatch(setLoading(false));
         dispatch(
             setMessage({
                 title: "¡Éxito!",
-                message: "El módulo se creo correctamente.",
+                message: "Se ha creado un nuevo usuario, verifique su correo.",
+                type: "success",
+            })
+        );
+        return newData;
+    } catch (error: any) {
+        dispatch(
+            setMessage({
+                title: "¡Error!",
+                message: error,
+                type: "warning",
+            })
+        );
+    }
+};
+
+export const updateUser = (id: string, data: any) => async (dispatch: AppDispatch) => {
+    dispatch(setLoading(true));
+    try {
+        const updateData = await client.models.Users.update({ id, ...data });
+        await CheckErrors(updateData);
+        dispatch(setLoading(false));
+        dispatch(
+            setMessage({
+                title: "¡Éxito!",
+                message: "El usuario actualizo correctamente.",
                 type: "success",
             })
         );
@@ -114,44 +131,16 @@ export const createModule = (data: Omit<Module, "id">) => async (dispatch: AppDi
     }
 };
 
-export const updateModule = (id: string, data: Partial<Module>) => async (dispatch: AppDispatch) => {
-
+export const deleteUser = (id: string) => async (dispatch: AppDispatch) => {
     dispatch(setLoading(true));
     try {
-        const updatedModule = await client.models.Modules.update({ id, ...data });
-
-        await CheckErrors(updatedModule);
-        dispatch(setLoading(false));
-
-        dispatch(
-            setMessage({
-                title: "¡Éxito!",
-                message: "El módulo se actualizo correctamente.",
-                type: "success",
-            })
-        );
-
-    } catch (error: any) {
-        dispatch(
-            setMessage({
-                title: "¡Error!",
-                message: error,
-                type: "warning",
-            })
-        );
-    }
-};
-
-export const deleteModule = (id: string) => async (dispatch: AppDispatch) => {
-    dispatch(setLoading(true));
-    try {
-        const deleteData = await client.models.Modules.delete({ id });
+        const deleteData = await client.models.Users.delete({ id });
         await CheckErrors(deleteData);
         dispatch(setLoading(false));
         dispatch(
             setMessage({
                 title: "¡Éxito!",
-                message: "El módulo se elimino correctamente.",
+                message: "El usuario se  elimino correctamente.",
                 type: "success",
             })
         );

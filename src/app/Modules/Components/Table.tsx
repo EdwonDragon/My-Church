@@ -2,15 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { Button, IconButton } from "@mui/material";
+import { Button } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import Form from "./Form";
 import CustomDialog from "@/components/CustomDialog/CustomDialog";
 import DeleteAction from "@/components/ActionsDataGrid/DeleteAction";
-import EditIcon from "@mui/icons-material/Edit";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import Loading from "@/components/Loading/Loading";
-import { showAlert } from "@/components/SweetAlert/Alert";
 import {
   deleteModule,
   fetchModules,
@@ -19,6 +17,7 @@ import {
 } from "@/store/thunks/thunkModules/thunkModules";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { cleanSelectedModule } from "@/store/slices/modulesSlice/modulesSlice";
+import EditAction from "@/components/ActionsDataGrid/EditAction";
 
 const Table = () => {
   const modules = useAppSelector((state) => state.modules);
@@ -39,12 +38,12 @@ const Table = () => {
     setOpen(true);
   };
 
-  const handleEdit = (Module: any) => {
-    dispatch(fetchModulesById(Module.id));
+  const handleEdit = (id: string) => {
+    dispatch(fetchModulesById(id));
     setOpen(true);
   };
 
-  const handleDelete = (id: any) => {
+  const handleDelete = (id: string) => {
     dispatch(deleteModule(id));
   };
 
@@ -59,15 +58,7 @@ const Table = () => {
       renderCell: (params: any) => {
         return (
           <>
-            <IconButton
-              title={"Editar módulo"}
-              onClick={() => handleEdit(params.row)}
-              aria-label='Editar'
-              size='large'
-            >
-              <EditIcon color='primary' />
-            </IconButton>
-
+            <EditAction handleEdit={handleEdit} id={params.row.id} />
             <DeleteAction id={params.row.id} onDelete={handleDelete} />
           </>
         );

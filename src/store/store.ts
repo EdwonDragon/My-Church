@@ -4,6 +4,7 @@ import authSlice from './slices/authSlice/authSlice';
 import messageSlice from './slices/messageSlice/messageSilce';
 import zonesSlice from './slices/zonesSlice/zonesSlice';
 import modulesSlice from './slices/modulesSlice/modulesSlice';
+import usersSlice from './slices/usersSilce/usersSlice';
 
 
 const store = configureStore({
@@ -11,7 +12,8 @@ const store = configureStore({
         user: authSlice,
         message: messageSlice,
         zones: zonesSlice,
-        modules: modulesSlice
+        modules: modulesSlice,
+        users: usersSlice
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
