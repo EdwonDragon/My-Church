@@ -40,7 +40,7 @@ const Form = ({ handleClose, setOpen }: FormProps) => {
 
   const onSubmit = async (data: any) => {
     if (zones.selectedZone) {
-      dispatch(updateZone(zones.selectedZone.id, data));
+      dispatch(updateZone(zones.selectedZone.id, data, false));
     } else {
       dispatch(createZone(data));
     }
