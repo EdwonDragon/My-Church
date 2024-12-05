@@ -9,7 +9,7 @@ import usersSlice from './slices/usersSilce/usersSlice';
 
 const store = configureStore({
     reducer: {
-        user: authSlice,
+        authUser: authSlice,
         message: messageSlice,
         zones: zonesSlice,
         modules: modulesSlice,

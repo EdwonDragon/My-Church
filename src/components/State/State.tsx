@@ -2,16 +2,16 @@
 import React from "react";
 import { useAuthenticator } from "@aws-amplify/ui-react";
 import { useEffect } from "react";
-import { setLoading, setUser } from "@/store/slices/authSlice/authSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import Menu from "../Menu/Menu";
 import { usePathname, useRouter } from "next/navigation";
 import Loading from "../Loading/Loading";
 import { showAlert } from "../SweetAlert/Alert";
 import { clearMessage } from "@/store/slices/messageSlice/messageSilce";
+import { setAuthUser } from "@/store/thunks/thunkAuth/thunkAuth";
 
 const State = () => {
-  const globalState = useAppSelector((state) => state.user);
+  const authUser = useAppSelector((state) => state.authUser);
   const message = useAppSelector((state) => state.message);
   const { user } = useAuthenticator();
   const dispatch = useAppDispatch();
@@ -30,24 +30,23 @@ const State = () => {
   }, [message]);
 
   useEffect(() => {
-    if (!globalState.user) {
-      dispatch(setLoading());
-      dispatch(setUser(user));
-    }
-  }, [globalState.user]);
+    dispatch(setAuthUser(user?.signInDetails?.loginId || ""));
+  }, [user]);
 
   useEffect(() => {
-    if (globalState.user?.role) {
-      const permisions = ["/Conferences", "/", "/Modules"];
-      if (!permisions.includes(pathname)) {
-        router.push("/");
+    if (authUser.user) {
+      if (authUser.user.role === "OWNER") {
+        const permisions = ["/Zones", "/"];
+        if (!permisions.includes(pathname)) {
+          router.push("/");
+        }
       }
     }
-  }, [pathname]);
+  }, [pathname, authUser.user]);
 
   return (
     <>
-      {globalState.isLoading && <Loading />}
+      {authUser.loading && <Loading />}
       <Menu />
     </>
   );

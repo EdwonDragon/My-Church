@@ -57,7 +57,7 @@ const schema = a.schema({
     zoneId: a.id(),
     zone: a.belongsTo('Zone', 'zoneId'),
   })
-    .secondaryIndexes((index) => [index("role")])
+    .secondaryIndexes((index) => [index("role"), index("email")])
     .authorization(allow => [
       allow.groups(["SUPERADMIND", "OWNER"]).to(["read", "update", "create", "delete"]),
     ]),

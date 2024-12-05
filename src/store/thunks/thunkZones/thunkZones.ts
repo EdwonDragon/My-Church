@@ -6,11 +6,10 @@ import { setMessage } from "@/store/slices/messageSlice/messageSilce";
 
 
 
-export const subscribeToZoneUpdates = () => (dispatch: AppDispatch) => {
+export const subscribeToZoneUpdates = (type: string) => (dispatch: AppDispatch) => {
     const sub = client.models.Zone.observeQuery().subscribe({
         next: ({ items }) => {
-
-            dispatch(setZones([...items]));
+            dispatch(fetchZoneByTypeAll(type));
         },
         error: (err) => {
             console.log(err)
@@ -27,28 +26,14 @@ export const subscribeToZoneUpdates = () => (dispatch: AppDispatch) => {
 };
 
 
-export const fetchZones = () => async (dispatch: AppDispatch) => {
+export const fetchZoneByTypeAll = (type: string) => async (dispatch: AppDispatch) => {
+
     dispatch(setLoading(true));
     try {
-        let allZones: any[] = [];
-        let nextToken: string | null = null;
-
-        do {
-            const rawResponse = await client.models.Zone.list({ nextToken });
-            if (!rawResponse || !rawResponse.data) {
-                throw new Error("No se recibió una respuesta válida");
-            }
-
-            const response: { data: any[]; nextToken: string | null } = {
-                data: rawResponse.data,
-                nextToken: rawResponse.nextToken || null,
-            };
-
-            allZones = [...allZones, ...response.data];
-            nextToken = response.nextToken;
-        } while (nextToken);
-
-        dispatch(setZones(allZones));
+        const { data } = await client.models.Zone.listZoneByType({
+            type
+        });
+        dispatch(setZones(data.length > 0 ? data : null));
         dispatch(setLoading(false));
     } catch (error: any) {
         dispatch(
@@ -62,13 +47,13 @@ export const fetchZones = () => async (dispatch: AppDispatch) => {
 };
 
 
-
 export const fetchZoneByType = (type: string) => async (dispatch: AppDispatch) => {
     dispatch(setLoading(true));
     try {
         const { data } = await client.models.Zone.listZoneByType({
             type
         });
+
         dispatch(setSelectedZone(data.length > 0 ? data : null));
         dispatch(setLoading(false));
     } catch (error: any) {

@@ -3,9 +3,12 @@ import { client } from "@/store/helpers/Client";
 interface CreateUserResponse {
     success: boolean
     message: string
-    User: {
-        Username: string;
-    };
+    data: {
+        User: {
+            Username: string;
+        };
+    }
+
 }
 
 export const userSignUp = async (
@@ -27,6 +30,6 @@ export const userSignUp = async (
 
     await client.mutations.addUserToGroup({
         groupName,
-        userId: parsedData.User.Username,
+        userId: parsedData.data.User.Username,
     });
 };

@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import Grid from "@mui/material/Grid2";
-import { Autocomplete, TextField } from "@mui/material";
-import { validateAlphanumeric, validateSelects } from "@/validators";
+import { TextField } from "@mui/material";
+import { validateAlphanumeric } from "@/validators";
 import Loading from "@/components/Loading/Loading";
-import types from "@/Jsons/zones.json";
 import ButtonsForm from "../../../components/ButtonsForm/ButtonsForm";
 import { UploadFile } from "@/components/UploadFile/UploadFile";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -22,15 +21,15 @@ const Form = ({ handleClose, setOpen }: FormProps) => {
     handleSubmit,
     reset,
     register,
-    control,
     setValue,
     trigger,
     watch,
     formState: { errors },
   } = useForm({
-    defaultValues: { name: "", location: "", logo: [], type: "" },
+    defaultValues: { name: "", location: "", logo: [] },
   });
   const zones = useAppSelector((state) => state.zones);
+  const authUser = useAppSelector((state) => state.authUser);
   const dispatch = useAppDispatch();
   const [files, setFiles]: any = useState({});
   useEffect(() => {
@@ -42,6 +41,12 @@ const Form = ({ handleClose, setOpen }: FormProps) => {
     if (zones.selectedZone) {
       dispatch(updateZone(zones.selectedZone.id, data, false));
     } else {
+      if (authUser.user.role == "SUPERADMIND") {
+        data.type = "Conference";
+      } else {
+        const { data: zone } = await authUser.user.zoneOwner();
+        data.type = zone.type === "Conference" ? "District" : "Church";
+      }
       dispatch(createZone(data));
     }
     handleClose();
@@ -52,7 +57,6 @@ const Form = ({ handleClose, setOpen }: FormProps) => {
       reset({
         location: zones.selectedZone.location,
         name: zones.selectedZone.name,
-        type: zones.selectedZone.type,
       });
       if (zones.selectedZone.logo) {
         setFiles({
@@ -72,7 +76,7 @@ const Form = ({ handleClose, setOpen }: FormProps) => {
           <TextField
             slotProps={{
               inputLabel: {
-                shrink: !!watch("name"), // This ensures shrink is a boolean (true or false)
+                shrink: !!watch("name"),
               },
             }}
             variant='outlined'
@@ -88,45 +92,18 @@ const Form = ({ handleClose, setOpen }: FormProps) => {
           <TextField
             slotProps={{
               inputLabel: {
-                shrink: !!watch("location"), // This ensures shrink is a boolean (true or false)
+                shrink: !!watch("location"),
               },
             }}
             variant='outlined'
-            {...register("location", validateAlphanumeric("Ubicacion"))}
-            label={"Ubicacion"}
+            {...register("location", validateAlphanumeric("Ubicación"))}
+            label={"Ubicación"}
             fullWidth
             helperText={errors.location?.message}
             error={!!errors.location}
           />
         </Grid>
-        <Grid size={12}>
-          <Controller
-            name='type'
-            control={control}
-            rules={validateSelects("type", false)}
-            render={({ field }) => (
-              <Autocomplete
-                value={
-                  types.find((option) => option.value === field.value) || null
-                }
-                options={types}
-                getOptionLabel={(option) => option.name}
-                onChange={(_, value) =>
-                  field.onChange(value ? value.value : "")
-                }
-                fullWidth
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    helperText={errors.type?.message}
-                    label='Zone'
-                    error={!!errors.type}
-                  />
-                )}
-              />
-            )}
-          />
-        </Grid>
+
         <Grid size={12}>
           <UploadFile
             max={1}

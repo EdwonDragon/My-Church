@@ -1,53 +1,28 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-// Definición de tipos
-interface AuthSignInDetails {
-    authFlowType?: string;
-    loginId?: string;
-}
-
-interface AuthUser {
-    username: string;
-    userId: string;
-    role?: string;
-    signInDetails?: AuthSignInDetails;
-}
-
 interface AuthState {
-    user: AuthUser | null;
-    isLoading: boolean; // Propiedad de carga
+    user: any | null;
+    loading: boolean;
 }
 
 const initialState: AuthState = {
     user: null,
-    isLoading: false, // Estado inicial de carga
+    loading: false,
 };
 
-// Creación de slice
 const authSlice = createSlice({
     name: "auth",
     initialState,
     reducers: {
-        // Acción para establecer el usuario
-        setUser(state, action: PayloadAction<AuthUser>) {
+        setUser(state, action: PayloadAction<any>) {
             state.user = action.payload;
-            state.isLoading = false; // Finalizar la carga
         },
-        // Acción para limpiar el usuario
-        clearUser(state) {
-            state.user = null;
-            state.isLoading = false; // Finalizar la carga
+        setLoading(state, action: PayloadAction<boolean>) {
+            state.loading = action.payload;
         },
-        // Acción para establecer el estado de carga
-        setLoading(state) {
-            state.isLoading = true; // Iniciar carga
-        },
-
     },
 });
 
-// Exportación de acciones
-export const { setUser, clearUser, setLoading } = authSlice.actions;
+export const { setUser, setLoading } = authSlice.actions;
 
-// Exportación del reducer
 export default authSlice.reducer;

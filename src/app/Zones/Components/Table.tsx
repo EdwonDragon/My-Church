@@ -14,30 +14,45 @@ import Loading from "@/components/Loading/Loading";
 import {
   deleteZone,
   fetchZoneById,
-  fetchZones,
   subscribeToZoneUpdates,
 } from "@/store/thunks/thunkZones/thunkZones";
 
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { cleanSelectedZone } from "@/store/slices/zonesSlice/zonesSlice";
 import { StorageImage } from "@aws-amplify/ui-react-storage";
-import Owners from "./Owners";
 import EditAction from "@/components/ActionsDataGrid/EditAction";
 import { fetchUserById } from "@/store/thunks/thunkUsers/thunkUsers";
 import { cleanSelectedUser } from "@/store/slices/usersSilce/usersSlice";
+import Owners from "@/app/Owners/page";
+import { useAuthenticator } from "@aws-amplify/ui-react";
 
 const Table = () => {
   const zones = useAppSelector((state) => state.zones);
   const owner = useAppSelector((state) => state.users);
+  const authUser = useAppSelector((state) => state.authUser);
   const [open, setOpen] = useState(false);
   const [openOwner, setOpenOwner] = useState(false);
-
   const dispatch = useAppDispatch();
 
+  const getData = async () => {
+    if (authUser.user) {
+      const { data: zone } = await authUser.user.zoneOwner();
+      if (authUser.user.role == "SUPERADMIND") {
+        dispatch(subscribeToZoneUpdates("Conference"));
+      } else {
+        dispatch(
+          subscribeToZoneUpdates(
+            zone.type == "Conference" ? "District" : "Church"
+          )
+        );
+      }
+    }
+  };
   useEffect(() => {
-    dispatch(subscribeToZoneUpdates());
-    dispatch(fetchZones());
-  }, []);
+    if (authUser.user) {
+      getData();
+    }
+  }, [authUser.user]);
 
   const handleOpenOnwer = async (Zone: any) => {
     const { data: owner } = await Zone.owner();
@@ -144,7 +159,11 @@ const Table = () => {
             owner.selectedUser ? "Editar propietario" : "Crear propietario"
           }
           children={
-            <Owners handleClose={handleCloseOnwer} setOpen={setOpenOwner} />
+            <Owners
+              handleClose={handleCloseOnwer}
+              setOpen={setOpenOwner}
+              role={"OWNER"}
+            />
           }
           handleClose={handleCloseOnwer}
           open={openOwner}

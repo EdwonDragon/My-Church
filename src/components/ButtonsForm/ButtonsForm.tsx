@@ -9,6 +9,7 @@ interface ButtonProps {
   trigger: any;
   handleSubmit: any;
   onSubmit: any;
+  exist?: boolean;
 }
 
 const ButtonsForm: React.FC<ButtonProps> = ({
@@ -17,6 +18,7 @@ const ButtonsForm: React.FC<ButtonProps> = ({
   trigger,
   handleSubmit,
   onSubmit,
+  exist = false,
 }) => {
   const dispatch = useAppDispatch();
 
@@ -45,14 +47,16 @@ const ButtonsForm: React.FC<ButtonProps> = ({
       >
         Cancelar
       </Button>
-      <Button
-        onClick={checkErrors}
-        variant='contained'
-        color='primary'
-        aria-label={selected ? "Actualizar registro" : "Crear nuevo registro"}
-      >
-        {selected ? "Actualizar" : "Crear"}
-      </Button>
+      {!exist && (
+        <Button
+          onClick={checkErrors}
+          variant='contained'
+          color='primary'
+          aria-label={selected ? "Actualizar registro" : "Crear nuevo registro"}
+        >
+          {selected ? "Actualizar" : "Crear"}
+        </Button>
+      )}
     </DialogActions>
   );
 };

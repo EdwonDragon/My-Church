@@ -81,10 +81,33 @@ export const fetchUserById = (id: string) => async (dispatch: AppDispatch) => {
     }
 };
 
+
+
+
+
+export const fetchZoneByEmail = (email: string) => async (dispatch: AppDispatch) => {
+
+    try {
+        const { data } = await client.models.Users.listUsersByEmail({
+            email,
+        });
+
+        return data;
+    } catch (error: any) {
+        dispatch(
+            setMessage({
+                title: "¡Error!",
+                message: error,
+                type: "warning",
+            })
+        );
+    }
+};
+
 export const createUser = (data: any) => async (dispatch: AppDispatch) => {
     dispatch(setLoading(true));
     try {
-        await userSignUp(data.email, data.password, data.role);
+        // await userSignUp(data.email, data.password, data.role);
         const newData = await client.models.Users.create(data);
         await CheckErrors(newData);
         dispatch(setLoading(false));
