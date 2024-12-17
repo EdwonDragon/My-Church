@@ -20,8 +20,8 @@ export const setAuthUser = (email: string) => async (dispatch: AppDispatch) => {
         const permission: any = [];
         const routeNames: any = {
             "/": "Inicio",
-            "/home": "Inicio",
-            "/home/": "Inicio",
+            "/Home": "Inicio",
+            "/Home/": "Inicio",
             "/Zones": "Zonas",
             "/Modules": "Módulos",
         }
