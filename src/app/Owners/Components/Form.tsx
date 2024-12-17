@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import Loading from "@/components/Loading/Loading";
 import Grid from "@mui/material/Grid2";

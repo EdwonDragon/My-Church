@@ -8,34 +8,25 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import GrainIcon from "@mui/icons-material/Grain";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
+import { useAppSelector } from "@/store/hooks";
 
 interface BreadCrumProps {
-  open: boolean; // Controls the Drawer state
+  open: boolean;
 }
 
 const BreadCrumb = ({ open }: BreadCrumProps) => {
+  const authUser = useAppSelector((state) => state.authUser);
   const router = useRouter();
   const pathname = usePathname();
 
-  // Map of routes to names
-  const routeNames: { [key: string]: string } = {
-    "/": "Inicio",
-    "/home": "Inicio",
-    "/home/": "Inicio",
-    "/Zones": "Zonas",
-    "/Modules": "Módulos",
-    "/Users": "Usuarios",
-  };
-
-  // Get the current page name from the route
   const getCurrentPageName = () => {
-    for (const route in routeNames) {
+    for (const route in authUser.routeNames) {
       const routeRegex = new RegExp(`^${route.replace(/:[^/]+/g, "([^/]+)")}$`);
       if (routeRegex.test(pathname)) {
-        return routeNames[route];
+        return authUser.routeNames[route];
       }
     }
-    return "Unknown"; // Default if no route is found
+    return "Unknown";
   };
 
   return (
@@ -44,14 +35,13 @@ const BreadCrumb = ({ open }: BreadCrumProps) => {
       sx={{
         position: "fixed",
         top: 70,
-        left: open ? "240px" : "70px", // Adjust this based on the width of your Drawer
+        left: open ? "240px" : "70px",
         width: "100%",
-        padding: "8px 16px", // Adjust padding if needed
-        zIndex: 1100, // Ensure it's above other content
-        transition: "left 0.3s ease", // Transition for smooth movement of the left property
+        padding: "8px 16px",
+        zIndex: 1100,
+        transition: "left 0.3s ease",
       }}
     >
-      {/* Home link */}
       <Link
         href='/'
         style={{
@@ -74,7 +64,6 @@ const BreadCrumb = ({ open }: BreadCrumProps) => {
         </Typography>
       </Link>
 
-      {/* Back button */}
       <div
         onClick={() => router.back()}
         style={{
@@ -97,7 +86,6 @@ const BreadCrumb = ({ open }: BreadCrumProps) => {
         </Typography>
       </div>
 
-      {/* Current page */}
       <Typography
         sx={{
           color: "text.primary",

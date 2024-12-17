@@ -12,8 +12,8 @@ import {
 import { useAuthenticator } from "@aws-amplify/ui-react";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import MenuIcon from "@mui/icons-material/Menu";
+import { useAppSelector } from "@/store/hooks";
 
-// Drawer width
 const drawerWidth = 240;
 
 interface AppBarProps extends MuiAppBarProps {
@@ -44,10 +44,10 @@ interface AppBarComponentProps {
 }
 
 const AppBarComponent = ({ open, handleDrawerOpen }: AppBarComponentProps) => {
+  const authUser = useAppSelector((state) => state.authUser);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const { signOut } = useAuthenticator();
 
-  // Memoize menu handlers
   const handleMenu = useCallback((event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   }, []);
@@ -59,7 +59,6 @@ const AppBarComponent = ({ open, handleDrawerOpen }: AppBarComponentProps) => {
   return (
     <StyledAppBar position='fixed' open={open}>
       <Toolbar>
-        {/* Drawer toggle button */}
         <IconButton
           color='inherit'
           aria-label='open drawer'
@@ -73,21 +72,17 @@ const AppBarComponent = ({ open, handleDrawerOpen }: AppBarComponentProps) => {
           <MenuIcon />
         </IconButton>
 
-        {/* Logo */}
         <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
-          <img
-            src='logo-def.png'
-            alt='Logo'
-            style={{ height: 40 }} // Adjust logo size
-          />
+          <img src='logo-def.png' alt='Logo' style={{ height: 40 }} />
         </Box>
 
-        {/* App title */}
         <Typography variant='h6' color='white' sx={{ flexGrow: 1 }}>
-          Name Church
+          {authUser.zoneOwner?.name}
+        </Typography>
+        <Typography variant='h6' color='white' sx={{ flexGrow: 1 }}>
+          {authUser.user?.username}
         </Typography>
 
-        {/* Account menu */}
         <IconButton
           size='large'
           aria-label='account of current user'
@@ -99,7 +94,6 @@ const AppBarComponent = ({ open, handleDrawerOpen }: AppBarComponentProps) => {
           <AccountCircle />
         </IconButton>
 
-        {/* Account Menu */}
         <Menu
           id='menu-appbar'
           anchorEl={anchorEl}
@@ -115,8 +109,8 @@ const AppBarComponent = ({ open, handleDrawerOpen }: AppBarComponentProps) => {
           open={Boolean(anchorEl)}
           onClose={handleClose}
         >
-          <MenuItem onClick={handleClose}>Profile</MenuItem>
-          <MenuItem onClick={signOut}>Sign Out</MenuItem>
+          <MenuItem onClick={handleClose}>Perfil</MenuItem>
+          <MenuItem onClick={signOut}>Cerrar sesión</MenuItem>
         </Menu>
       </Toolbar>
     </StyledAppBar>

@@ -35,14 +35,13 @@ const State = () => {
 
   useEffect(() => {
     if (authUser.user) {
-      if (authUser.user.role === "OWNER") {
-        const permisions = ["/Zones", "/"];
-        if (!permisions.includes(pathname)) {
+      if (authUser.user.role !== "SUPERADMIND") {
+        if (!authUser.permissions.includes(pathname)) {
           router.push("/");
         }
       }
     }
-  }, [pathname, authUser.user]);
+  }, [pathname, authUser]);
 
   return (
     <>

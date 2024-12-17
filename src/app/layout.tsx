@@ -15,15 +15,12 @@ export const metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang='es'>
-      {/* Aplicar el tema global a toda la app */}
       <Themes>
         <body>
-          {/* Proveedores y autenticadores envuelven a la aplicación */}
           <Providers>
             <Authenticators>
-              {/* State maneja state y menu */}
               <State />
-              {/* Contenido de la página */}
+
               {children}
             </Authenticators>
           </Providers>

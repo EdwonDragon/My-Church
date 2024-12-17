@@ -68,9 +68,11 @@ const schema = a.schema({
     rolesUser: a.string().array(),
     zoneId: a.id(),
     zone: a.belongsTo('Zone', 'zoneId'),
-  }).authorization(allow => [
-    allow.groups(["SUPERADMIND", "OWNER"]).to(["read", "update", "create", "delete"]),
-  ]),
+  })
+    .secondaryIndexes((index) => [index("zoneId")])
+    .authorization(allow => [
+      allow.groups(["SUPERADMIND", "OWNER"]).to(["read", "update", "create", "delete"]),
+    ]),
 
   createUser: a
     .mutation()

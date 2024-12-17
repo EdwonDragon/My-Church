@@ -5,6 +5,8 @@ import AppBarComponent from "./AppBar";
 import MiniDrawer from "./CustomDrawer";
 import BreadCrumb from "../BreadCrumb/BreadCrumb";
 import PublicIcon from "@mui/icons-material/Public";
+import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
+import RadarIcon from "@mui/icons-material/Radar";
 import ViewModuleIcon from "@mui/icons-material/ViewModule";
 import { useAppSelector } from "@/store/hooks";
 const Menu = () => {
@@ -16,14 +18,26 @@ const Menu = () => {
 
   useEffect(() => {
     if (authUser.user) {
-      if (authUser.user.role === "OWNER") {
-        setMenuItems([
-          {
-            text: "Zonas",
-            icon: <PublicIcon htmlColor='white' />,
-            route: "/Zones",
-          },
-        ]);
+      if (authUser.user.role !== "SUPERADMIND") {
+        setMenuItems(
+          [
+            {
+              text: "Zonas",
+              icon: <PublicIcon htmlColor='white' />,
+              route: "/Zones",
+            },
+            {
+              text: "Usuarios",
+              icon: <PersonAddAltIcon htmlColor='white' />,
+              route: "/Users",
+            },
+            {
+              text: "Puestos",
+              icon: <RadarIcon htmlColor='white' />,
+              route: "/Positions",
+            },
+          ].filter((item) => authUser.permissions.includes(item.route))
+        );
       } else if (authUser.user.role === "SUPERADMIND") {
         setMenuItems([
           {
@@ -39,7 +53,7 @@ const Menu = () => {
         ]);
       }
     }
-  }, [authUser.user]);
+  }, [authUser]);
 
   return (
     <Box sx={{ display: "flex" }}>
