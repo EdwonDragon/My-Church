@@ -6,7 +6,7 @@ import MiniDrawer from "./CustomDrawer";
 import BreadCrumb from "../BreadCrumb/BreadCrumb";
 import PublicIcon from "@mui/icons-material/Public";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
-import RadarIcon from "@mui/icons-material/Radar";
+import HomeWorkIcon from "@mui/icons-material/HomeWork";
 import ViewModuleIcon from "@mui/icons-material/ViewModule";
 import { useAppSelector } from "@/store/hooks";
 const Menu = () => {
@@ -32,9 +32,9 @@ const Menu = () => {
               route: "/Users",
             },
             {
-              text: "Puestos",
-              icon: <RadarIcon htmlColor='white' />,
-              route: "/Positions",
+              text: "Departamentos",
+              icon: <HomeWorkIcon htmlColor='white' />,
+              route: "/Departments",
             },
           ].filter((item) => authUser.permissions.includes(item.route))
         );

@@ -18,13 +18,7 @@ import {
 } from "@/store/thunks/thunkUsers/thunkUsers";
 import { updateZone } from "@/store/thunks/thunkZones/thunkZones";
 
-interface FormProps {
-  handleClose: () => void;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  role: string;
-}
-
-const Form = ({ handleClose, setOpen, role }: FormProps) => {
+const Form = ({ handleClose, setOpen, role }: any) => {
   const zones = useAppSelector((state) => state.zones);
   const owner = useAppSelector((state) => state.users);
   const [existEmail, setExistEmail] = useState(false);
